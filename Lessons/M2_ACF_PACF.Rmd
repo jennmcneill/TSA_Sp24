@@ -88,7 +88,8 @@ A plot of observed values over time is the first thing you do to start understan
 
 ```{r}
 #using package ggplot2
-ggplot()
+ggplot(inflow_data, aes(x=my_date,y=HP1))+
+  geom_line(color='tomato3')
 
 #adding two time series to the same plot
 
