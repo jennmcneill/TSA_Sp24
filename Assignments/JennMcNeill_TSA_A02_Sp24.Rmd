@@ -4,6 +4,8 @@ subtitle: "Assignment 2 - Due date 02/25/24"
 author: "Jenn McNeill"
 output: pdf_document
 geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
 ---
 
 ## Submission Instructions
@@ -22,6 +24,11 @@ R packages needed for this assignment:"forecast","tseries", and "dplyr". Install
 
 ```{r}
 #Load/install required package here
+library(dplyr)
+library(forecast)
+library(tseries)
+library(here)
+getwd()
 
 ```
 
@@ -32,7 +39,7 @@ Consider the data provided in the spreadsheet "Table_10.1_Renewable_Energy_Produ
 
 ```{r}
 #Importing data set
-
+Renewable_Energy_Raw <- read.table(file="./Data/Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source.csv", header=TRUE,dec = ".",sep=",",stringsAsFactors = TRUE) 
 ```
 
 
@@ -40,7 +47,9 @@ Consider the data provided in the spreadsheet "Table_10.1_Renewable_Energy_Produ
 You will work only with the following columns: Total Biomass Energy Production, Total Renewable Energy Production, Hydroelectric Power Consumption. Create a data frame structure with these three time series only. Use the command head() to verify your data.
 
 ```{r}
+Renewable_Energy <- select(Renewable_Energy_Raw, Total.Biomass.Energy.Production:Hydroelectric.Power.Consumption)
 
+head(Renewable_Energy)
 ```
 
 
@@ -48,7 +57,13 @@ You will work only with the following columns: Total Biomass Energy Production, 
 Transform your data frame in a time series object and specify the starting point and frequency of the time series using the function ts().
 
 ```{r}
+ts_biomass_production <- ts(Renewable_Energy$Total.Biomass.Energy.Production)
+ts_renewable_production <- ts(Renewable_Energy$Total.Renewable.Energy.Production)
+ts_hydroelectric_consumption <- ts(Renewable_Energy$Hydroelectric.Power.Consumption)
 
+ts_biomass_production
+ts_renewable_production
+ts_hydroelectric_consumption
 ```
 
 
@@ -56,7 +71,14 @@ Transform your data frame in a time series object and specify the starting point
 Compute mean and standard deviation for these three series.
 
 ```{r}
+mean_biomass_production <- mean(ts_biomass_production)
+sd_biomass_production <- sd(ts_biomass_production)
 
+mean_renewable_production <- mean(ts_renewable_production)
+sd_renewable_production <- sd(ts_renewable_production)
+
+mean_hydroelectric_consumption <- mean(ts_hydroelectric_consumption)
+sd_hydroelectric_consumption <- sd(ts_hydroelectric_consumption)
 ```
 
 
