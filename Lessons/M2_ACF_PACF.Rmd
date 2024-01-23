@@ -88,14 +88,15 @@ A plot of observed values over time is the first thing you do to start understan
 
 ```{r}
 #using package ggplot2
-<<<<<<< HEAD
 ggplot(inflow_data, aes(x=my_date,y=HP1))+
   geom_line(color='tomato3')
-=======
-ggplot()
->>>>>>> 7d05e948a77a5e95ab24f6123b882e9924441f31
 
 #adding two time series to the same plot
+ggplot(inflow_data, aes(x=my_date))+
+  geom_line(aes(y=HP1), color="navy")+
+  geom_line(aes(y=HP2), color="tomato2")+
+  xlab("Year")+
+  ylab("HP1 (cubic m per second)")
 
 ```
 
@@ -107,8 +108,11 @@ In this course we will also use *autoplot()* which is a ggplot() for time series
 Many of the functions we will use require a time series object. You can transform your data in a time series using the function *ts()*. Only the columns with reservoir inflow data should be transformed, not the ones with month and year. Your ts object is not a data frame, but like I said we will need it as a ts for some function we will explore in future scripts.
 
 ```{r}
-ts_inflow_data <- #####
-ts_inflow_data
+## time series objects can only take numbers. dataframes can have data of other formats all together.
+## we want all the rows, so we leave it blank before the comma
+## we want the second column, so put a 2 after the comma
+ts_inflow_data <- ts(inflow_data[,2],start=c(1931,1), frequency=12)
+ts_inflow_data 
 
 ```
 
@@ -131,17 +135,25 @@ autoplot(ts_inflow_data) +
 There are multiple ways to get acf and pacf plots in R. The default package "stats" have the functions acf() and pacf(). Another option is with the functions Acf() and Pacf() from package "forecast". Package forecast is not a default package. So you need to install and load it on the beginning of your scripts. 
 
 ```{r acf}
-# Option 1: The function acf() and pacf() is from package "stats"
-HP1_acf=
+## both of these options will give you the same results, but the plots will look a little bit different depending on which one you use
 
-HP1_pacf=
+# Option 1: The function acf() and pacf() is from package "stats"
+## autocorrelation function that gives us information about the self-correlation of our time series
+## how one observation is correlated with a different observation of the same variable
+## the output will be a plot that helps you visualize the autocorrelation better
+HP1_acf <- acf(ts_inflow_data)
+## we see that a seasonal component is present in your data set because the acf is sinusoidal/periodic
+## calling this with the $ will print the values in the console
+HP1_acf$acf
+
+HP1_pacf <- pacf(ts_inflow_data)
 
 #Option 2: Computing ACF and PACF with package "forecast"
 
 #The next line will output a plot since we have plot=TRUE and also store the acf values in the object
-HP1_acf=
+HP1_acf <- Acf(ts_inflow_data)
 
-HP1_pacf=
+HP1_pacf <- Pacf(ts_inflow_data, lag.max=40)
   
 ```
 
