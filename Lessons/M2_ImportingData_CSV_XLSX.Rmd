@@ -21,10 +21,7 @@ knitr::opts_chunk$set(echo = TRUE,tidy.opts=list(width.cutoff=60), tidy=TRUE)
 Second R code chunk is for loading packages. By setting `message = FALSE`, the code will appear but not the output. 
 
 ```{r package, message=FALSE}
-<<<<<<< HEAD
 install.packages("forecast")
-=======
->>>>>>> 7d05e948a77a5e95ab24f6123b882e9924441f31
 library(lubridate)
 library(ggplot2)
 library(forecast)

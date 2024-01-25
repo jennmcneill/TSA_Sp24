@@ -28,6 +28,8 @@ library(dplyr)
 library(forecast)
 library(tseries)
 library(here)
+library(lubridate)
+library(ggplot2)
 getwd()
 
 ```
@@ -47,7 +49,7 @@ Renewable_Energy_Raw <- read.table(file="./Data/Table_10.1_Renewable_Energy_Prod
 You will work only with the following columns: Total Biomass Energy Production, Total Renewable Energy Production, Hydroelectric Power Consumption. Create a data frame structure with these three time series only. Use the command head() to verify your data.
 
 ```{r}
-Renewable_Energy <- select(Renewable_Energy_Raw, Total.Biomass.Energy.Production:Hydroelectric.Power.Consumption)
+Renewable_Energy <- select(Renewable_Energy_Raw, Month, Total.Biomass.Energy.Production:Hydroelectric.Power.Consumption)
 
 head(Renewable_Energy)
 ```
@@ -57,9 +59,9 @@ head(Renewable_Energy)
 Transform your data frame in a time series object and specify the starting point and frequency of the time series using the function ts().
 
 ```{r}
-ts_biomass_production <- ts(Renewable_Energy$Total.Biomass.Energy.Production)
-ts_renewable_production <- ts(Renewable_Energy$Total.Renewable.Energy.Production)
-ts_hydroelectric_consumption <- ts(Renewable_Energy$Hydroelectric.Power.Consumption)
+ts_biomass_production <- ts(Renewable_Energy[,2],start=c(1973,1), frequency=12)
+ts_renewable_production <- ts(Renewable_Energy[,3],start=c(1973,1), frequency=12)
+ts_hydroelectric_consumption <- ts(Renewable_Energy[,4],start=c(1973,1), frequency=12)
 
 ts_biomass_production
 ts_renewable_production
@@ -86,7 +88,10 @@ sd_hydroelectric_consumption <- sd(ts_hydroelectric_consumption)
 Display and interpret the time series plot for each of these variables. Try to make your plot as informative as possible by writing titles, labels, etc. For each plot add a horizontal line at the mean of each series in a different color.
 
 ```{r}
-
+autoplot(ts_biomass_production)+
+  xlab("Year")
+autoplot(ts_hydroelectric_consumption)
+autoplot(ts_renewable_production)
 ```
 
 
