@@ -63,9 +63,9 @@ ts_biomass_production <- ts(Renewable_Energy[,2],start=c(1973,1), frequency=12)
 ts_renewable_production <- ts(Renewable_Energy[,3],start=c(1973,1), frequency=12)
 ts_hydroelectric_consumption <- ts(Renewable_Energy[,4],start=c(1973,1), frequency=12)
 
-ts_biomass_production
-ts_renewable_production
-ts_hydroelectric_consumption
+head(ts_biomass_production)
+head(ts_renewable_production)
+head(ts_hydroelectric_consumption)
 ```
 
 
@@ -81,6 +81,15 @@ sd_renewable_production <- sd(ts_renewable_production)
 
 mean_hydroelectric_consumption <- mean(ts_hydroelectric_consumption)
 sd_hydroelectric_consumption <- sd(ts_hydroelectric_consumption)
+
+mean(ts_biomass_production)
+sd(ts_biomass_production)
+
+mean(ts_renewable_production)
+sd(ts_renewable_production)
+
+mean(ts_hydroelectric_consumption)
+sd(ts_hydroelectric_consumption)
 ```
 
 
@@ -89,9 +98,25 @@ Display and interpret the time series plot for each of these variables. Try to m
 
 ```{r}
 autoplot(ts_biomass_production)+
-  xlab("Year")
-autoplot(ts_hydroelectric_consumption)
-autoplot(ts_renewable_production)
+  xlab("Year")+
+  ylab("Yearly Biomass Production in Trillion Btu")+
+  ggtitle("Biomass Production Time Series from 1973 to 2024")+
+  geom_hline(yintercept=mean_biomass_production, color = 'orchid3', size=1)+
+  theme_light()
+
+autoplot(ts_renewable_production)+
+  xlab("Year")+
+  ylab("Yearly Renewable Production in Trillion Btu")+
+  ggtitle("Renewable Production Time Series from 1973 to 2024")+
+  geom_hline(yintercept=mean_renewable_production, color = 'darkorange2', size=1)+
+  theme_light()
+
+autoplot(ts_hydroelectric_consumption)+
+  xlab("Year")+
+  ylab("Yearly Hydroelectric Consumption in Trillion Btu")+
+  ggtitle("Hydroelectric Consumption Time Series from 1973 to 2024")+
+  geom_hline(yintercept=mean_hydroelectric_consumption, color = 'steelblue2', size=1)+
+  theme_light()
 ```
 
 
@@ -99,23 +124,35 @@ autoplot(ts_renewable_production)
 Compute the correlation between these three series. Are they significantly correlated? Explain your answer.
 
 ```{r}
-
+Renewable_Energy_correlation <- cor(Renewable_Energy[,2:4])
+Renewable_Energy_correlation
 ```
 
+Total biomass energy production and total renewable energy production are significantly correleated with a correlation value of 0.97. It makes sense that these two variables correlate with each other because biomass is a renewable energy, so total biomass energy production is a subset of total renewable energy production. Neither of these series are significantly correlated to hydroelectric power consumption, with correlation values of -0.097 and -0.002, respectively. It makes sense that the power consumption series is not significantly correlated with energy production series because they are measuring metrics that do not directly depend on one another.
 
 ## Question 6
 Compute the autocorrelation function from lag 1 up to lag 40 for these three variables. What can you say about these plots? Do the three of them have the same behavior?
 
 ```{r}
+Biomass_Production_acf = Acf(ts_biomass_production,lag.max=40,plot=TRUE)
 
+Renewable_Production_acf = Acf(ts_renewable_production,lag.max=40,plot=TRUE)
+
+Hydroelectric_Consumption_acf = Acf(ts_hydroelectric_consumption,lag.max=40,plot=TRUE)
 ```
 
+The two types of production, biomass and total renewable, have the same autocorrelation behavior. Both of these autocorrelation plots peak at the first lag, which means that the production data from the previous month has the largest impact on the production data for the current month. As the lag gets larger, the autocorrelation lessens. The hydroelectric consumption autocorrelation has a seasonality component because we see the autocorrelation function following a pattern that lasts 12 lags. This means that the consumption data from twelve months prior has the largest impact on the consumption data for the current month.
 
 ## Question 7
 Compute the partial autocorrelation function from lag 1 to lag 40 for these three variables. How these plots differ from the ones in Q6?
 
 ```{r}
+Biomass_Production_pacf = Pacf(ts_biomass_production,lag.max=40,plot=TRUE)
 
+Renewable_Production_pacf = Pacf(ts_renewable_production,lag.max=40,plot=TRUE)
+
+Hydroelectric_Consumption_pacf = Pacf(ts_hydroelectric_consumption,lag.max=40,plot=TRUE)
 ```
 
+These plots all have different shapes than the autocorrelation graphs. The biggest difference is that the partial autocorrelation graphs each have a peak at the first lag and then their values drop more significantly than in the Acf graphs. This difference comes from the fact that the Pacf removes any autocorrelation that is from the lag prior. In interpreting the biomass and total renewable Pacfs, we see that the first lag has the most impact on the correlation and all subsequent lags have far less impact. The Pacf for hydroelectric consumption still has a seasonality component, but we see that lags 12 and 25 impact the correlation far less than the first lag does. These graphs are consistent with what I would assume based on what I know about these variables. 
 

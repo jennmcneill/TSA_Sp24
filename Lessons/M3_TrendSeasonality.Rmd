@@ -2,6 +2,8 @@
 title: "M3: Class Exercise on Trend and Season"
 author: "Luana Lima"
 output: pdf_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ## Setting R code chunk options
@@ -32,7 +34,7 @@ Let's continue working with our inflow data for reservoirs in Brazil.
 ```{r}
 
 #Importing time series data from text file#
-raw_inflow_data <- read.table(file="../Data/inflowtimeseries.txt",header=FALSE,skip=0)
+raw_inflow_data <- read.table(file="./Data/inflowtimeseries.txt",header=FALSE,skip=0)
 
 #Trim the table to include only columns you need
 nhydro <- ncol(raw_inflow_data)-2
@@ -70,6 +72,8 @@ Initial time series plot.
 
 ```{r}
 #using package ggplot2
+## 1+i to keep track of indexing -- the first column is the date, which we want to bypass
+## need to use the print function to visualize a ggplot in a for loop
 for(i in 1:nhydro){
   print(ggplot(inflow_data, aes(x=my_date, y=inflow_data[,(1+i)])) +
             geom_line(color="blue") +
@@ -86,14 +90,14 @@ The initial plots showed that we have zeros in the end of the data set. It could
 ```{r}
 #check the final obs on data 
 tail(inflow_data)
-
-
 ```
 
 Note our last observation is from August 2011 but the data file was filled with zeros. Let's remove the last four rows of our data set.
 
 ```{r}
 #Remove last year by replacing current data frame
+
+## nobs = number of observations
 inflow_data <- inflow_data[1:(nobs-12),]
 
 #update object with number of observations
