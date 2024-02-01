@@ -125,7 +125,7 @@ head(ts_inflow_data,15)
 Let's use functions Acf() and Pacf() from package "forecast".
 
 ```{r acf}
-# par function divides the plotting window into a grid. here it is one row and two columns. use plotgrrid() function if you're using ggplot2.
+# par function divides the plotting window into a grid. here it is one row and two columns. use plotgrid() function if you're using ggplot2.
 #Acf and Pacf for HP1
 for(i in 1:nhydro){
   par(mfrow=c(1,2))  #place plot side by side

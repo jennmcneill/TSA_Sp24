@@ -36,7 +36,16 @@ R packages needed for this assignment:"forecast","tseries", and "Kendall". Insta
 ```{r}
 #Load/install required package here
 
+library(forecast)
+library(tseries)
+library(Kendall)
+library(lubridate)
+library(ggplot2)
+library(cowplot)
+library(dplyr)
+getwd()
 ```
+
 
 ##Trend Component
 
@@ -44,17 +53,131 @@ R packages needed for this assignment:"forecast","tseries", and "Kendall". Insta
 For each time series, i.e., Renewable Energy Production and Hydroelectric Consumption create three plots: one with time series, one with the ACF and with the PACF. You may use the some code form A2, but I want all the three plots side by side as in a grid.
 (Hint: use function `plot_grid()` from the `cowplot` package)
 
+```{r Q1}
+#Importing data set
+renewable_energy_raw <- read.table(file="./Data/Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source.csv", header=TRUE,dec = ".",sep=",",stringsAsFactors = TRUE) 
+
+#Select columns of interest
+renewables <- select(renewable_energy_raw, Month, Total.Biomass.Energy.Production:Hydroelectric.Power.Consumption)
+
+#Create time series objects
+ts_rp <- ts(renewables[,3],start=c(1973,1), frequency=12)
+ts_hc <- ts(renewables[,4],start=c(1973,1), frequency=12)
+
+#Compute Acf for each time series
+rp_acf = ggAcf(ts_rp,lag.max=40,plot=TRUE) + ggtitle(NULL)
+hc_acf = ggAcf(ts_hc,lag.max=40,plot=TRUE) + ggtitle(NULL)
+
+#Compute Pacf for each time series
+rp_pacf = ggPacf(ts_rp,lag.max=40,plot=TRUE) + ggtitle(NULL)
+hc_pacf = ggPacf(ts_hc,lag.max=40,plot=TRUE) + ggtitle(NULL)
+
+#Plot the time series objects
+rp_ts_plot <-
+  autoplot(ts_rp)+
+  xlab("Year")+
+  ylab("Yearly Renewable Production in Trillion Btu")
+rp_ts_plot
+
+hc_ts_plot <-
+  autoplot(ts_hc)+
+  xlab("Year")+
+  ylab("Yearly Hydroelectric Consumption in Trillion Btu")
+hc_ts_plot 
+
+#Plot all three plots side by side
+plot_grid(rp_ts_plot,
+          rp_acf,
+          rp_pacf,
+          ncol = 3, align = "v")
+
+plot_grid(hc_ts_plot,
+          hc_acf,
+          hc_pacf,
+          ncol = 3, align = "v")
+```
+
 ### Q2
-From the plot in Q1, do the series Total Biomass Energy Production, Total Renewable Energy Production, Hydroelectric Power Consumption appear to have a trend? If yes, what kind of trend?
+From the plot in Q1, do the series Total Renewable Energy Production and Hydroelectric Power Consumption appear to have a trend? If yes, what kind of trend?
 
 ### Q3
 Use the *lm()* function to fit a linear trend to the three time series. Ask R to print the summary of the regression. Interpret the regression output, i.e., slope and intercept. Save the regression coefficients for further analysis.
+
+```{r Q3}
+#Create variables to use for indexing
+t <- 1:nobs
+
+#Fit a linear trend to the renewable production time series
+rp_lm <- lm(renewables[,3]~t)
+summary(rp_lm)
+#Store slope and intercept coefficients
+rp_beta0 <- rp_lm$coefficients[1]
+rp_beta1 <- rp_lm$coefficients[2]
+
+#Fit a linear trend to the hydroelectric consumption time series 
+hc_lm <- lm(renewables[,4]~t)
+summary(hc_lm)
+#Store slope and intercept coefficients
+hc_beta0 <- hc_lm$coefficients[1]
+hc_beta1 <- hc_lm$coefficients[2]
+
+rp_beta0
+rp_beta1
+hc_beta0
+hc_beta1
+```
  
 ### Q4
 Use the regression coefficients from Q3 to detrend the series. Plot the detrended series and compare with the plots from Q1. What happened? Did anything change?
 
+```{r Q4}
+ts_rp_detrend <- ts((renewables[,3] - (rp_beta0 + (rp_beta1*t))),
+                         start=c(1973,1), frequency=12)
+
+autoplot(ts_rp, color = "slateblue4")+
+  autolayer(ts_rp_detrend, color = "tomato3")+
+  xlab("Year")+
+  ylab("Yearly Renewable Energy Production in Trillion Btu")+
+  theme_light()+
+  theme(legend.position = "none")
+
+ts_hc_detrend <- ts((renewables[,4] - (hc_beta0 + (hc_beta1*t))),
+                         start=c(1973,1), frequency=12)
+
+autoplot(ts_hc, color = "palegreen4")+
+  autolayer(ts_hc_detrend, color = "orchid3")+
+  xlab("Year")+
+  ylab("Yearly Hydroelectric Power Consumption in Trillion Btu")+
+  theme_light()+
+  theme(legend.position = "none")
+```
+
+
 ### Q5
 Plot ACF and PACF for the detrended series and compare with the plots from Q1. You may use plot_grid() again to get them side by side. nut mot mandatory. Did the plots change? How?
+
+```{r Q5}
+#Compare the Acf for renewable production with and without trend
+par(mfrow=c(1,2))
+  Acf(ts_rp,lag.max=40,plot=TRUE) 
+  Acf(ts_rp_detrend,lag.max=40,plot=TRUE)
+
+#Compare the Pacf for renewable production with and without trend 
+par(mfrow=c(1,2))
+  Pacf(ts_rp,lag.max=40,plot=TRUE) 
+  Pacf(ts_rp_detrend,lag.max=40,plot=TRUE)
+
+#Compare the Acf for hydroelectric consumption with and without trend
+par(mfrow=c(1,2))
+  Acf(ts_hc,lag.max=40,plot=TRUE) 
+  Acf(ts_hc_detrend,lag.max=40,plot=TRUE)
+
+#Compare the Pacf for hydroelectric consumption with and without trend  
+par(mfrow=c(1,2))
+  Pacf(ts_hc,lag.max=40,plot=TRUE) 
+  Pacf(ts_hc_detrend,lag.max=40,plot=TRUE)
+```
+
 
 ## Seasonal Component
 
@@ -65,6 +188,12 @@ Just by looking at the time series and the acf plots, do the series seem to have
 
 ### Q7
 Use function *lm()* to fit a seasonal means model (i.e. using the seasonal dummies) the two time series. Ask R to print the summary of the regression. Interpret the regression output. From the results which series have a seasonal trend? Do the results match you answer to Q6?
+
+```{r Q7}
+
+
+```
+
 
 ### Q8
 Use the regression coefficients from Q7 to deseason the series. Plot the deseason series and compare with the plots from part Q1. Did anything change?
