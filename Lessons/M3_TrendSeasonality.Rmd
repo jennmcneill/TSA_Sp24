@@ -187,15 +187,102 @@ ggplot(df_detrend, aes(x=date))+
 Note that blue line is our original series, red line is our trend, green line is our original series minus the trend or in other words the detrended series. And in orange is the trend line for the detrended series which has slope 0 meaning we were able to effectively eliminate the trend with a linear model.
 
 
+```{r}
+library(cowplot)
+install.packages("ggfortify")
+library(ggfortify)
+
+ts_y_detrend <- ts(y_detrend,start=c(1931,1),frequency=12)
+
+plot_grid(
+  autoplot(ts_inflow_data[,iHP],ylab="Observed Inflow"),
+  autoplot(Acf(ts_inflow_data[,iHP],lag.max=40,plot=FALSE),main=NULL),
+  autoplot(ts_y_detrend,ylab="Observed Inflow - Linear Model"),
+  autoplot(Acf(ts_y_detrend,lag.max=40,plot=FALSE),main=NULL),
+  nrow=2,ncol=2
+)
+
+#if you don't include plot=false, then you'll get random Acfs and Pacfs when you go ahead and knit
+#note how removing the trend significantly changed the ACF plot. you decreased the time dependence of the series.
+#we want a model that represents our dataset and is a combination of other variables. the question is how many lagged observations do i need to add? ideally we want to have 
+```
+
+
 ## Seasonal Component
 
 Now let's shift attention to the seasonal component.
 
 ```{r}
 #Use seasonal means model
+iHP <- 1
 
+#create dummies
+dummies <- seasonaldummy(ts_inflow_data[,iHP])
 
+#regress on dummies
+seas_linear_model <- lm(inflow_data[,(iHP+1)]~dummies)
+summary(seas_linear_model)
+
+#store coefficients
+beta0 <- seas_linear_model$coefficients[1]
+beta1 <- seas_linear_model$coefficients[2:12]
+
+#seasonal component
+seas_comp <- array(0,nobs)
+for(i in 1:nobs){
+  seas_comp[i] <- beta0 + beta1 %*% dummies[i,]
+}
+
+#%*% is element by element matrix
+
+ggplot(inflow_data, aes(x=my_date))+
+  geom_line(aes(y=inflow_data[,(iHP+1)]), color = "black")+
+  geom_line(aes(y=seas_comp), color = "tomato3")+
+  theme_light()
+
+#create deseasoned data
+y_deseason <- inflow_data[,(iHP+1)] - seas_comp
+
+ggplot(inflow_data, aes(x=my_date))+
+  geom_line(aes(y=inflow_data[,(iHP+1)]), color = "black")+
+  geom_line(aes(y=y_deseason), color = "orchid3")+
+  theme_light()
+
+#assuming that our seasonal component is constant over time
+#take the mean of each month
 ```
+
+
+##See what happens to Acf when we remove seasonality
+
+```{r}
+library(cowplot)
+library(ggfortify)
+
+ts_y_deseason <- ts(y_deseason,start=c(1931,1),frequency=12)
+
+plot_grid(
+  autoplot(ts_inflow_data[,iHP],ylab="Observed Inflow"),
+  autoplot(Acf(ts_inflow_data[,iHP],lag.max=40,plot=FALSE),main=NULL),
+  autoplot(Pacf(ts_inflow_data[,iHP],lag.max=40,plot=FALSE),main=NULL),
+  autoplot(ts_y_deseason,ylab="Observed Inflow - Linear Model"),
+  autoplot(Acf(ts_y_deseason,lag.max=40,plot=FALSE),main=NULL),
+  autoplot(Pacf(ts_y_deseason,lag.max=40,plot=FALSE),main=NULL),
+  nrow=2,ncol=3
+)
+
+#remember that we used a constant seasonal model
+#this could explain why the Acf and Pacf is still showing jumps at lags 12,24,36...
+#this assumes that the seasonality is perfectly cyclical in 12 month cycles but it is not necessarily true
+```
+
+##Decompose with a single command
+
+```{r}
+iHP <- 1
+plot(decompose(ts_inflow_data[,(iHP)]))
+```
+
 
 ##Exercise
 
