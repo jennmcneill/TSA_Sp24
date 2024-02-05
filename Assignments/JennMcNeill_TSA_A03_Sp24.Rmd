@@ -139,26 +139,26 @@ Beta1 for renewable production being positive shows that production is increasin
 ### Q4
 Use the regression coefficients from Q3 to detrend the series. Plot the detrended series and compare with the plots from Q1. What happened? Did anything change?
 
-```{r Q4}
-ts_rp_detrend <- ts((renewables[,3] - (rp_beta0 + (rp_beta1*t))),
-                         start=c(1973,1), frequency=12)
+```{r}
+#Store the detrended renewable production series
+rp_detrend <- renewables[,3] - (rp_beta0 + (rp_beta1*t))
 
-autoplot(ts_rp, color = "black")+
-  autolayer(ts_rp_detrend, color = "tomato3")+
-  xlab("Year")+
-  ylab("Yearly Renewable Energy Production in Trillion Btu")+
-  theme_light()+
-  theme(legend.position = "none")
+#Plot
+ggplot(renewables, aes(x=Date))+
+  geom_line(aes(y=renewables[,3]), color = "black")+
+  geom_line(aes(y=rp_detrend), color = "tomato3")+
+  ggtitle("Renewable Energy Production With and Without Trend")+
+  theme_light()
 
-ts_hc_detrend <- ts((renewables[,4] - (hc_beta0 + (hc_beta1*t))),
-                         start=c(1973,1), frequency=12)
+#Store the detrended hydroelectric production series
+hc_detrend <- renewables[,4] - (hc_beta0 + (hc_beta1*t))
 
-autoplot(ts_hc, color = "black")+
-  autolayer(ts_hc_detrend, color = "orchid3")+
-  xlab("Year")+
-  ylab("Yearly Hydroelectric Power Consumption in Trillion Btu")+
-  theme_light()+
-  theme(legend.position = "none")
+#Plot
+ggplot(renewables, aes(x=Date))+
+  geom_line(aes(y=renewables[,4]), color = "black")+
+  geom_line(aes(y=hc_detrend), color = "orchid3")+
+  ggtitle("Hydroelectric Power Consumption With and Without Trend")+
+  theme_light()
 ```
 
 When you detrend both of these series, the production/consumption values in trillion btu decrease significantly. In the renewable energy production graph, we are removing the "upward" trend from the data, so we see the plot flatten out instead of steadily increasing upwards. In the hydroelectric power consumption graph, which did not show an upward or downward trend to begin with, we see that the shape of the graph stays the same. Since there was not a clear trend to remove, the plot just shifts downwards but retains its horizontality.
@@ -243,7 +243,8 @@ rp_deseason <- renewables[,3] - rp_seasonal_component
 #Plot original time series and deseasoned time series
 ggplot(renewables, aes(x=Date))+
   geom_line(aes(y=renewables[,3]), color = "black")+
-  geom_line(aes(y=rp_deseason), color = "orchid3")+
+  geom_line(aes(y=rp_deseason), color = "tomato3")+
+  ggtitle("Renewable Energy Production With and Without Seasonality")+
   theme_light()
 
 #Continue with hydroelectric consumption
@@ -264,10 +265,11 @@ hc_deseason <- renewables[,4] - hc_seasonal_component
 ggplot(renewables, aes(x=Date))+
   geom_line(aes(y=renewables[,4]), color = "black")+
   geom_line(aes(y=hc_deseason), color = "orchid3")+
+  ggtitle("Hydroelectric Power Consumption With and Without Seasonality")+
   theme_light()
 ```
 
-
+When seasonality is removed, the plot for renewable energy production shifts downward and the peaks and falls decrease slightly in amplitude. The hydroelectric power consumption plot displays a much more significant change when seasonality is removed because the dramatic rises and falls of the time series data decrease significantly in amplitude, which causes the new plot to take on a now shape.
 
 ### Q9
 Plot ACF and PACF for the deseason series and compare with the plots from Q1. You may use plot_grid() again to get them side by side. nut mot mandatory. Did the plots change? How?
@@ -298,3 +300,4 @@ par(mfrow=c(1,2))
   Pacf(ts_hc_deseason,lag.max=40,plot=TRUE)
 ```
 
+The ACF plots for renewable production did not change. The PACF plot for renewable production show slightly less significant partial autocorrelation for lags 13, 25, and 27 after removing seasonality. The ACF plot for hydroelectric consumption completely changes shape when the seasonality is removed, which shows that the data can no longer be strongly correlated based on a seasonal lag. The PACF likewise shows less significant partial autocorrelation for lags 13, 25, and 37 after removing seasonality.
