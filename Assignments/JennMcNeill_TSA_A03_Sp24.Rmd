@@ -30,7 +30,7 @@ Consider the same data you used for A2 from the spreadsheet "Table_10.1_Renewabl
 
 R packages needed for this assignment:"forecast","tseries", and "Kendall". Install these packages, if you haven't done yet. Do not forget to load them before running your script, since they are NOT default packages.\\
 
-```{r project setup}
+```{r project setup, message=FALSE}
 library(forecast)
 library(tseries)
 library(Kendall)
@@ -102,7 +102,7 @@ plot_grid(hc_ts_plot + ggtitle("Hydroelectric Power Consumption"),
 ### Q2
 From the plot in Q1, do the series Total Renewable Energy Production and Hydroelectric Power Consumption appear to have a trend? If yes, what kind of trend?
 
-The Renewable Energy Production series appears to have a steady upward trend over the years from 1973 to 2024. The Hydroelectric Power Consumption series appears to have a yearly trend with minimums and maximums that correspond to the seasons. The ACF of renewable production shows a nearly-constant, repeatedly-high correlation, while the ACF of hydroelectric consumption shows seasonality with maximums at 12, 24, and 36 months.
+The Renewable Energy Production series appears to have a steady upward trend over the years from 1973 to 2024. The Hydroelectric Power Consumption series does not appear to trend upwards nor downwards. 
 
 ### Q3
 Use the *lm()* function to fit a linear trend to the three time series. Ask R to print the summary of the regression. Interpret the regression output, i.e., slope and intercept. Save the regression coefficients for further analysis.
@@ -134,7 +134,7 @@ hc_beta0
 hc_beta1
 ```
  
-Beta1 for renewable production being positive shows that production is increasing over time. The R^2 value of 0.81 means that 81% of the variability is explained by time. Beta1 for hydroelectric consumption being negative/practically zero shows that the consumption is not trending upwards or downwards in a significant direction. The R^2 value of 0.01 means that 1% of the variability is explained by time.
+Beta0 is ~181 for renewable production, which means that the linear regression model starts at this point at the y-axis. Beta1 for renewable production being positive shows that production is increasing over time. The R^2 value of 0.81 means that 81% of the variability is explained by time. Beta0 is ~83 for hydroelectric consumption, which means that the linear regression model starts at this point at the y-axis. Beta1 for hydroelectric consumption being negative/practically zero shows that the consumption is not trending upwards or downwards in a significant direction. The R^2 value of 0.01 means that 1% of the variability is explained by time.
 
 ### Q4
 Use the regression coefficients from Q3 to detrend the series. Plot the detrended series and compare with the plots from Q1. What happened? Did anything change?
@@ -148,6 +148,8 @@ ggplot(renewables, aes(x=Date))+
   geom_line(aes(y=renewables[,3]), color = "black")+
   geom_line(aes(y=rp_detrend), color = "tomato3")+
   ggtitle("Renewable Energy Production With and Without Trend")+
+  xlab("Year")+
+  ylab("Trillion BTU")+
   theme_light()
 
 #Store the detrended hydroelectric production series
@@ -158,15 +160,21 @@ ggplot(renewables, aes(x=Date))+
   geom_line(aes(y=renewables[,4]), color = "black")+
   geom_line(aes(y=hc_detrend), color = "orchid3")+
   ggtitle("Hydroelectric Power Consumption With and Without Trend")+
+  xlab("Year")+
+  ylab("Trillion BTU")+
   theme_light()
 ```
 
-When you detrend both of these series, the production/consumption values in trillion btu decrease significantly. In the renewable energy production graph, we are removing the "upward" trend from the data, so we see the plot flatten out instead of steadily increasing upwards. In the hydroelectric power consumption graph, which did not show an upward or downward trend to begin with, we see that the shape of the graph stays the same. Since there was not a clear trend to remove, the plot just shifts downwards but retains its horizontality.
+When you detrend both of these series, the production/consumption values in trillion btu decrease significantly. In the renewable energy production graph, we are removing the "upward" trend from the data, so we see the plot flatten out instead of steadily increasing upwards. In the hydroelectric power consumption graph, which did not show an upward or downward trend to begin with, we see that the shape of the graph stays the same. Since there was not a clear trend to remove, the plot just shifts downwards.
 
 ### Q5
 Plot ACF and PACF for the detrended series and compare with the plots from Q1. You may use plot_grid() again to get them side by side. nut mot mandatory. Did the plots change? How?
 
 ```{r Q5}
+#Make the detrended data into a time series object
+ts_rp_detrend <- ts(rp_detrend, start=c(1973,1), frequency=12)
+ts_hc_detrend <- ts(hc_detrend, start=c(1973,1), frequency=12)
+
 #Compare the Acf for renewable production with and without trend
 par(mfrow=c(1,2))
   Acf(ts_rp,lag.max=40,plot=TRUE) 
@@ -225,7 +233,7 @@ According to the linear regressions on the dummy matrix, the renewable energy pr
 ### Q8
 Use the regression coefficients from Q7 to deseason the series. Plot the deseason series and compare with the plots from part Q1. Did anything change?
 
-```{r}
+```{r Q8}
 #Start with renewable production
 #Store coefficients
 beta0_rp <- ts_rp_lm$coefficients[1]
@@ -245,6 +253,8 @@ ggplot(renewables, aes(x=Date))+
   geom_line(aes(y=renewables[,3]), color = "black")+
   geom_line(aes(y=rp_deseason), color = "tomato3")+
   ggtitle("Renewable Energy Production With and Without Seasonality")+
+  xlab("Year")+
+  ylab("Trillion BTU")+
   theme_light()
 
 #Continue with hydroelectric consumption
@@ -266,15 +276,17 @@ ggplot(renewables, aes(x=Date))+
   geom_line(aes(y=renewables[,4]), color = "black")+
   geom_line(aes(y=hc_deseason), color = "orchid3")+
   ggtitle("Hydroelectric Power Consumption With and Without Seasonality")+
+  xlab("Year")+
+  ylab("Trillion BTU")+
   theme_light()
 ```
 
-When seasonality is removed, the plot for renewable energy production shifts downward and the peaks and falls decrease slightly in amplitude. The hydroelectric power consumption plot displays a much more significant change when seasonality is removed because the dramatic rises and falls of the time series data decrease significantly in amplitude, which causes the new plot to take on a now shape.
+When seasonality is removed, the plot for renewable energy production shifts downward and the peaks and falls decrease slightly in amplitude. The hydroelectric power consumption plot displays a much more significant change when seasonality is removed because the dramatic rises and falls of the time series data decrease significantly in amplitude, which causes the new plot to take on a new shape.
 
 ### Q9
 Plot ACF and PACF for the deseason series and compare with the plots from Q1. You may use plot_grid() again to get them side by side. nut mot mandatory. Did the plots change? How?
 
-```{r}
+```{r Q9}
 #Make the deseasoned data into a time series object
 ts_rp_deseason <- ts(rp_deseason, start=c(1973,1), frequency=12)
 ts_hc_deseason <- ts(hc_deseason, start=c(1973,1), frequency=12)
