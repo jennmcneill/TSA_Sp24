@@ -167,6 +167,8 @@ ggplot(renewables, aes(x=Date))+
 
 When you detrend both of these series, the production/consumption values in trillion btu decrease significantly. In the renewable energy production graph, we are removing the "upward" trend from the data, so we see the plot flatten out instead of steadily increasing upwards. In the hydroelectric power consumption graph, which did not show an upward or downward trend to begin with, we see that the shape of the graph stays the same. Since there was not a clear trend to remove, the plot just shifts downwards.
 
+edit: we actually still see trends up and down in the renewable energy production data with respect to the horizontal line at 0. this is because we are removing a constant linear slope even though the slope of the original line is actually changing with respect to time.
+
 ### Q5
 Plot ACF and PACF for the detrended series and compare with the plots from Q1. You may use plot_grid() again to get them side by side. nut mot mandatory. Did the plots change? How?
 
