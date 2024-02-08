@@ -2,6 +2,8 @@
 title: "M3: Exercise"
 author: "Luana Lima"
 output: pdf_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ## Setting R code chunk options
@@ -269,11 +271,12 @@ Check for deterministic trend.
 SMKtest <- SeasonalMannKendall(ts_inflow_data[,iHP])
 print("Results for Seasonal Mann Kendall /n")
 print(summary(SMKtest))
+#this test is telling us that we have a trend. p is less than .05 so we reject the null hypothesis that there is no trend. score is positive, so trend is increasing. the value of the score depends on the number of observations.
 
 #Use yearly date to run Mann Kendall
 print("Results of Mann Kendall on average yearly series")
 print(summary(MannKendall(inflow_data_yearly)))
-
+#this test is telling us that we have a trend. p is less than .05 so we reject the null hypothesis that there is no trend. score is positive, so trend is increasing. the value of the score depends on the number of observations.
 ```
 
 ### Spearman Correlation test 
@@ -289,6 +292,8 @@ print(sp_rho)
 #with cor.test you can get test statistics
 sp_rho=cor.test(inflow_data_yearly,my_year,method="spearman")
 print(sp_rho)
+
+#not a strong correlation, but we know that the slope is small so we were not expecting a strong correlation anyways.
 ```
 
 ### Augmented Dickey Fuller (ADF)
