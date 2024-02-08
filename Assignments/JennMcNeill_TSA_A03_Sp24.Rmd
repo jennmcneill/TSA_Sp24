@@ -232,6 +232,8 @@ summary(ts_hc_lm)
 
 According to the linear regressions on the dummy matrix, the renewable energy production's linear regression R^2 value of -0.009 means that only -0.9% of renewable energy production is explained by seasonality. On the other hand, the hydroelectric power consumption's linear regression R^2 value of 0.459 means that 46% of hydroelectric power consumption is explained by seasonality. These values align with my prediction that seasonality played a role only in hydroelectric power consumption.
 
+the seasonal means model is not a good fit for the renewable energy production time series because there is not a lot of variation of the mean with respect to which month you're in aka the seasonality is not strong
+
 ### Q8
 Use the regression coefficients from Q7 to deseason the series. Plot the deseason series and compare with the plots from part Q1. Did anything change?
 
