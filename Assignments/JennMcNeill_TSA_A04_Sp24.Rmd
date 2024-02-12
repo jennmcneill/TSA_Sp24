@@ -20,10 +20,8 @@ When you have completed the assignment, **Knit** the text and code into a single
 
 R packages needed for this assignment: "xlsx" or "readxl", "ggplot2", "forecast","tseries", and "Kendall". Install these packages, if you haven't done yet. Do not forget to load them before running your script, since they are NOT default packages.\\
 
-```{r}
+```{r setup}
 #Load/install required package here
-install.packages("xlsx")
-#library(xlsx)
 library(readxl)
 library(ggplot2)
 library(forecast)
@@ -37,7 +35,7 @@ library(lubridate)
 
 Consider the same data you used for A3 from the spreadsheet "Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source.xlsx". The data comes from the US Energy Information and Administration and corresponds to the January 2021 Monthly Energy Review. For this assignment you will work only with the column "Total Renewable Energy Production". 
 
-```{r}
+```{r import data}
 
 #Import the dataset
 renewable_energy_raw <- read_excel(path="./Data/Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source.xlsx",skip = 12, sheet="Monthly Data",col_names=FALSE) 
@@ -53,6 +51,15 @@ head(renewable_energy_raw)
 
 #Select columns of interest
 renewables <- select(renewable_energy_raw, `Month`, `Total Renewable Energy Production`)
+
+#Make sure that the last year of data is complete
+tail(renewables)
+
+#Change indexing so that 9 months of 2023 are removed
+renewables <- renewables[1:600,]
+
+#Confirm that the data ends at December 2022
+tail(renewables)
 
 #Change the date to a date object
 Date <- ymd(renewables$Month) 
@@ -74,7 +81,7 @@ Difference the "Total Renewable Energy Production" series using function diff().
 
 Try differencing at lag 1 only once, i.e., make `lag=1` and `differences=1`. Plot the differenced series Do the series still seem to have trend?
 
-```{r}
+```{r Q1}
 
 ts_rp_diff <- diff(ts_rp, lag=1, differences=1)
 
@@ -86,10 +93,12 @@ autoplot(ts_rp_diff)+
 
 ```
 
-### Q2
-Copy and paste part of your code for A3 where you run the regression for Total Renewable Energy Production and subtract that from the orinal series. This should be the code for Q3 and Q4. make sure you use the same name for you time series object that you had in A3.
+Differencing the series seems to remove the trend. There are still fluctuations in the amplitude of the plot, but the slope is not visibly positive or negative.
 
-```{r}
+### Q2
+Copy and paste part of your code for A3 where you run the regression for Total Renewable Energy Production and subtract that from the original series. This should be the code for Q3 and Q4. make sure you use the same name for you time series object that you had in A3.
+
+```{r Q2}
 
 #Create variables to use for indexing
 nobs <- nrow(renewables) 
@@ -126,25 +135,26 @@ Now let's compare the differenced series with the detrended series you calculate
 
 Using autoplot() + autolayer() create a plot that shows the three series together. Make sure your plot has a legend. The easiest way to do it is by adding the `series=` argument to each autoplot and autolayer function. Look at the key for A03 for an example. 
 
-```{r}
+```{r Q3}
 
 #Convert detrended series to a time series object
 ts_rp_detrend <- ts(rp_detrend,start=c(1973,1), frequency=12)
 
 #Plot all three time series objects
-autoplot(ts_rp,series="1. Original")+
-  autolayer(ts_rp_detrend,series="2. Detrended")+
-  autolayer(ts_rp_diff,series="3. Differenced")+
+autoplot(ts_rp,series="Original")+
+  autolayer(ts_rp_detrend,series="Detrended")+
+  autolayer(ts_rp_diff,series="Differenced")+
   ylab("Trillion BTU")+
   ggtitle("Total Renewable Energy Production")+
-  theme_light()
+  theme_light()+
+  theme(legend.position = "bottom")
 
 ```
 
 ### Q4
 Plot the ACF for the three series and compare the plots. Add the argument `ylim=c(-0.5,1)` to the autoplot() or Acf() function - whichever you are using to generate the plots - to make sure all three y axis have the same limits. Which method do you think was more efficient in eliminating the trend? The linear regression or differencing?
 
-```{r}
+```{r Q4}
 
 #Compare the Acf for renewable production with and without trend
 par(mfrow=c(1,3))
@@ -154,11 +164,12 @@ par(mfrow=c(1,3))
 
 ```
 
+I think that differencing was more efficient in eliminating the trend. The ACFs for the original time series and the detrended time series both have the same shape, which means that the detrended series' values still rely heavily on the values at one lag prior. With the differenced time series, the ACF shows that lags 12, 24, and 36 have the highest autocorrelation and that the value at a given time relies less on the time step one before it. Additionally, the maximum magnitude of the autocorrelation for the differenced time series is close to the minimum magnitude of the autocorrelation for the other two time series. Differencing the series lowers the overall autocorrelation and removes the trend more efficieintly than performing the linear regression.
 
 ### Q5
 Compute the Seasonal Mann-Kendall and ADF Test for the original "Total Renewable Energy Production" series. Ask R to print the results. Interpret the results for both test. What is the conclusion from the Seasonal Mann Kendall test? What's the conclusion for the ADF test? Do they match what you observed in Q2? Recall that having a unit root means the series has a stochastic trend. And when a series has stochastic trend we need to use a different procedure to remove the trend.
 
-```{r}
+```{r Q5}
 
 SMK_ts_rp <- SeasonalMannKendall(ts_rp)
 print(summary(SMK_ts_rp))
@@ -168,11 +179,12 @@ print(ADF_ts_rp)
 
 ```
 
+The results of the Seasonal Mann Kendall show that there is a trend in the data because the p-value is 2.22e-16, which is less than .05. According to this p-value, we can reject the null hypothesis that there is no trend. Additionally, the score is positive, which means that the trend is increasing. This matches what I observed in Q2, which is that the original time series had a positive trend. The ADF results in a p-value of 0.87, which is above .05. This means we fail to reject the null hypothesis that there is a unit root, and we can assume that our data has a stochastic trend. This matches what we said in Q2 because the trend was removed by differencing and not by the linear detrending method.
 
 ### Q6
 Aggregate the original "Total Renewable Energy Production" series by year. You can use the same procedure we used in class. Store series in a matrix where rows represent months and columns represent years. And then take the columns mean using function colMeans(). Recall the goal is the remove the seasonal variation from the series to check for trend. Convert the accumulates yearly series into a time series object and plot the series using autoplot().
 
-```{r}
+```{r Q6}
 
 rp_matrix <- matrix(ts_rp,byrow=FALSE,nrow=12)
 rp_yearly <- colMeans(rp_matrix)
@@ -192,9 +204,9 @@ autoplot(ts_rp_yearly)+
 ```
 
 ### Q7
-Apply the Mann Kendal, Spearman correlation rank test and ADF. Are the results from the test in agreement with the test results for the monthly series, i.e., results for Q6?
+Apply the Mann Kendall, Spearman correlation rank test and ADF. Are the results from the test in agreement with the test results for the monthly series, i.e., results for Q6?
 
-```{r}
+```{r Q7}
 
 MK_ts_rp_yearly <- MannKendall(ts_rp_yearly)
 print(summary(MK_ts_rp_yearly))
@@ -207,4 +219,4 @@ print(ADF_ts_rp_yearly)
 
 ```
 
-
+The results when I run the tests on a series of monthly averages are consistent with my results from when I ran the tests on the original time series. The Mann-Kendall test and Spearman Rank Correlation tests both provide p-values less than 0.05. Because of these values, I can reject the null hypotheses that there is no trend. The positive scores show that the trend is increasing upwards. Likewise, the ADF gives me a p-value pf 0.92 (more than 0.05), so I fail to reject the null hypothesis that there is a unit root. This means our trend is stochastic, which makes sense because differencing was the preferential method to remove the trend whereas the linear method did not work effectively.
