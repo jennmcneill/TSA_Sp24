@@ -165,7 +165,7 @@ plot(decompose_wind_mult)
 
 ```
 
-> Answer: The random component for both time series appears much more random using the multiplicative method. The solar time series still has a bit of a predictable, seasonal pattern with the multiplicative method, but not as severe as with the additive method. The wind time series using the multiplicative method appears truly random.
+> Answer: The random component for both time series appears much more random using the multiplicative method. The magnitude of the seasonality is allowed to change, so there isn't an increase in amplitude towards the end. The solar time series still has a bit of a predictable, seasonal pattern with the multiplicative method, but not as severe as with the additive method. The wind time series also still shows seasonality. The random components are not centered at zero as they should be.
 
 ### Q6
 
@@ -206,15 +206,15 @@ Apply the `tsclean()` to both series from Q7. Did the function removed any outli
 clean_solar <- tsclean(ts_solar)
 clean_wind <- tsclean(ts_wind)
 
-autoplot(clean_solar, series="Solar Clean")+
-  autolayer(ts_solar, series="Solar Raw")+
+autoplot(ts_solar, series="Solar Raw")+
+  autolayer(clean_solar, series="Solar Clean")+
   xlab("Year")+
   ylab("Solar Energy Consumption")+
   labs(color = "")+
   theme_light()
 
-autoplot(clean_wind, series="Wind Clean")+
-  autolayer(ts_wind, series="Wind Raw")+
+autoplot(ts_wind, series="Wind Raw")+
+  autolayer(clean_wind, series="Wind Clean")+
   xlab("Year")+
   ylab("Wind Energy Consumption")+
   labs(color = "")+
@@ -233,15 +233,15 @@ Redo number Q8 but now with the time series you created on Q7, i.e., the series 
 clean_solar_2012 <- tsclean(ts_solar_2012)
 clean_wind_2012 <- tsclean(ts_wind_2012)
 
-autoplot(clean_solar_2012, series="Solar Clean")+
-  autolayer(ts_solar_2012, series="Solar Raw")+
+autoplot(ts_solar_2012, series="Solar Raw")+
+  autolayer(clean_solar_2012, series="Solar Clean")+
   xlab("Year")+
   ylab("Solar Energy Consumption")+
   labs(color = "")+
   theme_light()
 
-autoplot(clean_wind_2012, series="Wind Clean")+
-  autolayer(ts_wind_2012, series="Wind Raw")+
+autoplot(ts_wind_2012, series="Wind Raw")+
+  autolayer(clean_wind_2012, series="Wind Clean")+
   xlab("Year")+
   ylab("Wind Energy Consumption")+
   labs(color = "")+
