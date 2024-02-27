@@ -227,6 +227,8 @@ print(Model_111)
 compare_aic <- data.frame(Model_111$aic)
 
 #Check residuals series, if white noise we got a good fit
+Model_111$residuals #estimated - observed. we want residuals to be white noise centered at 0 with no time dependence between the error. the error at t should not depend on error at t-1. ACF and PACF should have insignificant coefficients always between the two dashed lines.
+Model_111$fitted
 plot_grid(
   autoplot(Model_111$residuals),
   autoplot(Acf(Model_111$residuals,lag.max=40, plot = FALSE)),
@@ -234,7 +236,7 @@ plot_grid(
   nrow=1
 )
 
-#Now let's try ARIMA(0,1,1)
+#Now let's try ARIMA(0,1,1) # no AR component. differencing the data and adding a moving average term.
 Model_011 <- Arima(deseasonal_residential_price,order=c(0,1,1),include.drift=TRUE)
 print(Model_011)
 compare_aic <- data.frame(compare_aic,Model_011$aic)
@@ -257,6 +259,9 @@ plot_grid(
   autoplot(Pacf(Model_211$residuals,lag.max=40, plot = FALSE)),
   nrow=1
 )
+
+compare_aic
+#remember that the middle term always has to stay 1 because we are doing the differencing. we want the aic to be the lowest as possible. so far, the 011 is the best fit because the number is the lowest.
 
 #Now let's try ARIMA(1,1,2)
 Model_112 <- Arima(deseasonal_residential_price,order=c(1,1,2),include.drift=TRUE)
@@ -285,6 +290,8 @@ plot_grid(
 
 #Let's check AIC
 print(compare_aic)
+
+#the 212 is the best because it has the lowest AIC value.
 ```
 
 ## Automatically fitting ARIMA
@@ -293,7 +300,8 @@ Now that you have played with different order, let's try the auto.arima() functi
 
 ```{r}
 
-
+Model_autofit <- auto.arima(deseasonal_residential_price,max.D=0,max.P=0,max.Q=0)
+print(Model_autofit)
 
 ```
 
@@ -306,7 +314,7 @@ If you don't differenciate the series, i.e., if you input the non-stationarity s
 
 Model_101 <- Arima(deseasonal_residential_price,order=c(1,0,1))
 
-#You will get an error!
+#You will get an error! it can't fit the series because you need the differencing.
 
 Model_101_diff=Arima(deseasonal_residential_price_diff,order=c(1,0,1))
 print(Model_101_diff)
@@ -323,11 +331,12 @@ Note that AIC is worse for the ARIMA(1,0,1) with the non-difference series.
 One way of checking goodness of fit is by plotting observed versus fitted value over time. Here we will do it for some of the models we created only. But it can be generalized for all of them.
 
 ```{r}
-
+#plot the observed series vs the fitted series that we obtained with the model
 autoplot(deseasonal_residential_price,series="Observed")+
-  autolayer(???)
-
-
+  autolayer(Model_111$fitted,series="ARIMA(1,1,1)")+
+  autolayer(Model_211$fitted,series="ARIMA(2,1,1)")+
+  autolayer(Model_212$fitted,series="ARIMA(2,1,2)")+
+  autolayer(Model_011$fitted,series="ARIMA(0,1,1)")
 ```
 This is still non-seasonal data. If you want to compare to original series, you need to add seasonal component back.
 
