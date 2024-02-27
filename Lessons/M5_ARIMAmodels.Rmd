@@ -192,7 +192,7 @@ plot_grid(
                 main = "Orginal Residential Electricity Price"),
   autoplot(Pacf(deseasonal_residential_price, lag = 40, plot=FALSE),  
                   main = "Deseason Residential Electricity Price"),
-  autoplot(Oacf(deseasonal_residential_price_diff, lag = 40, plot=FALSE),  
+  autoplot(Pacf(deseasonal_residential_price_diff, lag = 40, plot=FALSE),  
                   main = "Diff/Deseason Residential Electricity Price")
 )
 ```
