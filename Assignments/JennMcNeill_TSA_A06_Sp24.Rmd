@@ -38,7 +38,7 @@ Describe the important characteristics of the sample autocorrelation function (A
 
 * AR(2)
 
-> Answer: For AR models, the ACF will decay exponentially with time, which means that what happened in the past is a good indication of what happens in the future. Significant magnitude values on the ACF at the beginning eventually decay with time because the model is autoregressive. The PACF will identify the order of the AR model depending on how many significant lags it displays. An AR(2) model will display 2 significant lags in the PACF.
+> Answer: For AR models, the ACF will decay exponentially with time, which means that what happened in the past is a good indication of what happens in the future. Significant magnitude values on the ACF at the beginning decay because the model is autoregressive. The PACF will identify the order of the AR model depending on how many significant lags it displays. An AR(2) model will display 2 significant lags in the PACF.
 
 * MA(1)
 
@@ -93,11 +93,11 @@ plot_grid(
 
 (d) Look at the ACFs and PACFs. Imagine you had these plots for a data set and you were asked to identify the model, i.e., is it AR, MA or ARMA and the order of each component. Would you be able identify them correctly? Explain your answer.
 
-> Answer: We cannot correctly identify the models just based on the looks of the ACFs and PACFs in this context. The first order AR model should show an ACF that exponentially decays and a PACF that has one significant lag. The ACF does not exponentially decay; it actually shows seasonality. The PACF does show one significant lag as it shoult. For the first order MA model, we should see an ACF with one significant lag and a PACF that exponentially decays. The ACF shows two significant lags, and the PACF does not exponentially decay. The ACF and PACF for the ARMA(1,1) each have four to five significant lags and also exhibit signs of seasonality. I think that what is happening is that the time series have too much seasonality 
+> Answer: We cannot correctly identify the models just based on the looks of the ACFs and PACFs in this context. The first order AR model should show an ACF that exponentially decays and a PACF that has one significant lag. The ACF does not exponentially decay; it actually shows seasonality. The PACF does show one significant lag as it should. For the first order MA model, we should see an ACF with one significant lag and a PACF that exponentially decays. The ACF shows two significant lags, and the PACF does not exponentially decay. The ACF and PACF for the ARMA(1,1) each have four to five significant lags and also exhibit signs of seasonality. I think that what is happening is that the time series have too much seasonality and so the ACFs and PACFs are not showing the characteristics that we would expect.
 
 (e) Compare the PACF values R computed with the values you provided for the lag 1 correlation coefficient, i.e., does $\phi=0.6$ match what you see on PACF for ARMA(1,0), and ARMA(1,1)? Should they match?
 
-> Answer:
+> Answer: The phi = 0.6 is not represented on the PACF for ARMA(1,0). The significant lag has a magnitude of about 0.35 instead of 0.6. The PACF(1,1) has one significant lag at the 0.6 mark, but it also has other significant lags that go outside the blue dashed lines and are adding noise to the PACF that makes it appear as if it is higher than a first-order model.
 
 (f) Increase number of observations to $n=1000$ and repeat parts (b)-(e).
 
@@ -127,13 +127,27 @@ plot_grid(
 
 ```
 
+(d) Look at the ACFs and PACFs. Imagine you had these plots for a data set and you were asked to identify the model, i.e., is it AR, MA or ARMA and the order of each component. Would you be able identify them correctly? Explain your answer.
+
+> Answer: Increasing n to 1000 definitely helps with the shapes of the ACF and PACF plots. The plots become easier to disginguish and become more useful in determining the orders of our models. For model ARMA(1,0), we see exponential decay in the ACF and one significant lag in the PACF. For model ARMA(0,1), we do not see exponential decay in the PACF but we do see one significant lag in the ACF. These plots still are not perfect because they display seasonality and have a lot of excessive noise that disrupts the orders.
+
+(e) Compare the PACF values R computed with the values you provided for the lag 1 correlation coefficient, i.e., does $\phi=0.6$ match what you see on PACF for ARMA(1,0), and ARMA(1,1)? Should they match?
+
+> Answer: ARMA(1,1) model has a significant lag in the ACF that reaches 0.8 and a significant lag in the PACF that reaches 0.6, which closely correspond to our phi and alpha values. But these plots also have additional significant lags that fall outside the dashed blue lines, which means that the models are not effectively representing the (1,1) order of the model that we hoped to see.
+
 ## Q3
 
 Consider the ARIMA model $y_t=0.7*y_{t-1}-0.25*y_{t-12}+a_t-0.1*a_{t-1}$
 
-(a) Identify the model using the notation ARIMA$(p,d,q)(P,D,Q)_ s$, i.e., identify the integers $p,d,q,P,D,Q,s$ (if possible) from the equation.
+(a) Identify the model using the notation ARIMA$(p,d,q)(P,D,Q)_ s$, i.e., identify the integers $p,d,q,P,D,Q,s$ (if possible) from the equation. 
+
+ARIMA$(1,0,1)(1,0,0)_ 12$
 
 (b) Also from the equation what are the values of the parameters, i.e., model coefficients.
+
+$phi_1$ = 0.7
+$theta_1$ = -0.1
+$phi_12$ = -0.25
 
 ## Q4
 
@@ -141,13 +155,26 @@ Simulate a seasonal ARIMA$(0, 1)\times(1, 0)_{12}$ model with $\phi =0 .8$ and $
 series using `autoplot()`. Does it look seasonal?
 
 ```{r}
+set.seed(100)
+sarima_01x10x12 <- as.ts(sim_sarima(n=1000, list(ar = 0, ma = 0.5, sar = 0.8, sma = 0, nseasons = 12)))
 
+autoplot(sarima_01x10x12)
 ```
+
+> Answer: 
 
 ## Q5
 
 Plot ACF and PACF of the simulated series in Q4. Comment if the plots are well representing the model you simulated, i.e., would you be able to identify the order of both non-seasonal and seasonal components from the plots? Explain.
 
 ```{r}
-
+plot_grid(
+  autoplot(Acf(sarima_01x10x12, lag = 40, plot=FALSE), main = "ACF (0,1)x(1,0)_12"),
+  autoplot(Pacf(sarima_01x10x12, lag = 40, plot=FALSE), main = "PACF (0,1)x(1,0)_12"),
+  ncol=2
+)
 ```
+
+SARIMA = non-stationary and
+seasonal process
+A SARIMA model with P=1, as our model simulates, should display positive spikes in the ACF at lags 12, 24, 36, etc. and a single positive spike in PACF at lag 12. Our ACF and PACF match these descriptions, which means that the plots are a good representation of the seasonal components of the model. In terms of the non-seasonal components, we would expect the ACF to have a significant first lag and the PACF to exhibit exponential decay. The seasonality of the time series 
