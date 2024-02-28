@@ -93,7 +93,7 @@ plot_grid(
 
 (d) Look at the ACFs and PACFs. Imagine you had these plots for a data set and you were asked to identify the model, i.e., is it AR, MA or ARMA and the order of each component. Would you be able identify them correctly? Explain your answer.
 
-> Answer: We cannot correctly identify the models just based on the looks of the ACFs and PACFs in this context. The first order AR model should show an ACF that exponentially decays and a PACF that has one significant lag. The ACF does not exponentially decay; it actually shows seasonality. The PACF does show one significant lag as it should. For the first order MA model, we should see an ACF with one significant lag and a PACF that exponentially decays. The ACF shows two significant lags, and the PACF does not exponentially decay. The ACF and PACF for the ARMA(1,1) each have four to five significant lags and also exhibit signs of seasonality. I think that what is happening is that the time series have too much seasonality and so the ACFs and PACFs are not showing the characteristics that we would expect.
+> Answer: It is difficult to accurately identify the models just based on the looks of the ACFs and PACFs in this context with n = 100. The first order AR model should show an ACF that exponentially decays and a PACF that has one significant lag. If we consider the absolute value of the magnitude of the ACF and PACF, the two first order AR graphs generally follow this rule but have a number of extra "significant" lags that fall outside the dashed blue lines and alter our results. For the first order MA model, we should see an ACF with one significant lag and a PACF that exponentially decays. Again considering the absolute values of these plots, we see the same issue that there are a few too many significant lags even though the shape of the graphs is more or less correct. As we increase the number of observations, we should see ACFs and PACFs that are better representations of the orders of these models. 
 
 (e) Compare the PACF values R computed with the values you provided for the lag 1 correlation coefficient, i.e., does $\phi=0.6$ match what you see on PACF for ARMA(1,0), and ARMA(1,1)? Should they match?
 
@@ -129,7 +129,7 @@ plot_grid(
 
 (d) Look at the ACFs and PACFs. Imagine you had these plots for a data set and you were asked to identify the model, i.e., is it AR, MA or ARMA and the order of each component. Would you be able identify them correctly? Explain your answer.
 
-> Answer: Increasing n to 1000 definitely helps with the shapes of the ACF and PACF plots. The plots become easier to disginguish and become more useful in determining the orders of our models. For model ARMA(1,0), we see exponential decay in the ACF and one significant lag in the PACF. For model ARMA(0,1), we do not see exponential decay in the PACF but we do see one significant lag in the ACF. These plots still are not perfect because they display seasonality and have a lot of excessive noise that disrupts the orders.
+> Answer: Increasing n to 1000 definitely helps with the shapes of the ACF and PACF plots. The plots become easier to disginguish and become more useful in determining the orders of our models. For model ARMA(1,0), we see exponential decay in the ACF and one significant lag in the PACF. For model ARMA(0,1), we see exponential decay in the PACF and one significant lag in the ACF. These plots still are not perfect because they display excessive noise outside of the blue dashed lines that disrupts the orders, but they are an improvement from the n = 100 ACFs and PACFs.
 
 (e) Compare the PACF values R computed with the values you provided for the lag 1 correlation coefficient, i.e., does $\phi=0.6$ match what you see on PACF for ARMA(1,0), and ARMA(1,1)? Should they match?
 
@@ -161,7 +161,7 @@ sarima_01x10x12 <- as.ts(sim_sarima(n=1000, list(ar = 0, ma = 0.5, sar = 0.8, sm
 autoplot(sarima_01x10x12)
 ```
 
-> Answer: 
+> Answer: The plot shows some seasonality in the sense that there appears to be a yearly pattern with a maximum and minimum. The pattern is not extremely obvious nor repeatable in terms of magnitude. The seasonality honestly looks a bit random because our number of observations is so high. Seeing the ACF and PACF will be able to help with seeing seasonal lags and trends.
 
 ## Q5
 
@@ -175,6 +175,4 @@ plot_grid(
 )
 ```
 
-SARIMA = non-stationary and
-seasonal process
-A SARIMA model with P=1, as our model simulates, should display positive spikes in the ACF at lags 12, 24, 36, etc. and a single positive spike in PACF at lag 12. Our ACF and PACF match these descriptions, which means that the plots are a good representation of the seasonal components of the model. In terms of the non-seasonal components, we would expect the ACF to have a significant first lag and the PACF to exhibit exponential decay. The seasonality of the time series 
+A SARIMA model with P=1, as our model simulates, should display positive spikes in the ACF at lags 12, 24, 36, etc. and a single positive spike in PACF at lag 12. Our ACF and PACF match these descriptions, which means that the plots are a good representation of the seasonal components of the model. In terms of the non-seasonal components, we would expect the ACF to have a significant first lag with phi = 0.8 and the PACF to have a significant first lag with alpha = 0.5 and then exhibit exponential decay. The seasonality of the time series seems like it might be interfering with the ACFs and PACFs because they do not do a good job of determining the order of the AR and MA components of this model.
