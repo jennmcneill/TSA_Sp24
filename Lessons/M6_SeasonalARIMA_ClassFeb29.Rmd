@@ -26,7 +26,7 @@ library(Kendall)
 library(tseries)
 library(outliers)
 library(tidyverse)
-
+library(cowplot)
 ```
 
 ## Importing data
@@ -62,7 +62,7 @@ summary(electricity_price_processed)
 
 ## How to deal with missing rows but not NAs
 
-Our data goes from January 2001 to November 2022. I will remove a couple rows randonly and show you how to detect missing rows.
+Our data goes from January 2001 to November 2022. I will remove a couple rows randomly and show you how to detect missing rows.
 
 ```{r}
 
@@ -209,11 +209,12 @@ plot_grid(
                   main = "Seasonal-Differenced Residential"),
   autoplot(Pacf(residential_price_trend_diff, lag = 40, plot=FALSE),  
                   main = "Trend-Differenced Residential"),
-  autoplot(Acf(residential_price_both_diff, lag = 40, plot=FALSE),  
+  autoplot(Pacf(residential_price_both_diff, lag = 40, plot=FALSE),  
                   main = "Twice-Differenced Residential"),
   nrow=2
 )
 
+# the original PACF with a lag close to 1 means that you might have unit root which indicates stochastic trent
 
 #Plot ACF and PACF for twice-differenced series - Steps 3 (order of non-seasonal) and 5 ) order of seasonal
 plot_grid(
@@ -230,7 +231,32 @@ plot_grid(
 
 ```{r}
 
+Model1 <- Arima(ts_electricity_price[,"Residential"],order=c(1,1,1),seasonal=c(0,1,1), include.drift=FALSE)
 
+#we don't need to include s=12 because we already specified the seasonality when we created our timeseries.
+
+print(Model1)
+plot_grid(
+  autoplot(Model1$residuals),
+  autoplot(Acf(Model1$residuals, lag = 40, plot=FALSE)),
+  autoplot(Pacf(Model1$residuals, lag = 40, plot=FALSE)),
+  nrow=1
+)
+
+Model2 <- auto.arima(ts_electricity_price[,"Residential"])
+print(Model2)
+
+plot_grid(
+  autoplot(Model2$residuals),
+  autoplot(Acf(Model2$residuals, lag = 40, plot=FALSE)),
+  autoplot(Pacf(Model2$residuals, lag = 40, plot=FALSE)),
+  nrow=1
+)
+#we know the auto is a better fit because the AIC is -178 and we got -177. we want the one that has the most negative AIC value.
+
+autoplot(ts_electricity_price[,"Residential"], series = "Original")+
+  autolayer(Model1$fitted,series="ARIMA(1,1,1)(0,1,1)")+
+  autolayer(Model2$fitted,series="ARIMA(2,0,0)(0,1,1)")
 ```
 
 ## Automatically fitting seasonal ARIMA to original series
