@@ -243,6 +243,12 @@ plot_grid(
   nrow=1
 )
 
+```
+
+## Automatically fitting seasonal ARIMA to original series
+
+```{r}
+
 Model2 <- auto.arima(ts_electricity_price[,"Residential"])
 print(Model2)
 
@@ -257,14 +263,6 @@ plot_grid(
 autoplot(ts_electricity_price[,"Residential"], series = "Original")+
   autolayer(Model1$fitted,series="ARIMA(1,1,1)(0,1,1)")+
   autolayer(Model2$fitted,series="ARIMA(2,0,0)(0,1,1)")
-```
-
-## Automatically fitting seasonal ARIMA to original series
-
-```{r}
-
-
-
 
 ```
 
@@ -275,7 +273,15 @@ Recall from M5 that the best fit for the non-seasonal time series is a ARIMA(2,1
 
 ```{r}
 
+#recall from M6 that the best fit for the non-seasonal time series is an ARIMA(2,1,2) with drift
 
+ARIMA_autofit <- auto.arima(deseasonal_residential_price, max.D=0, max.P=0, max.Q=0)
+print(ARIMA_autofit)
+
+par(mfrow=c(1,3))
+ts.plot(ARIMA_autofit$residuals)
+Acf(ARIMA_autofit$residuals,lag.max=40)
+Pacf(ARIMA_autofit$residuals,lag.max=40)
 
 ```
 
