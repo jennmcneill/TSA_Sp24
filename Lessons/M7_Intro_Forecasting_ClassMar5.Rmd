@@ -222,7 +222,7 @@ autoplot(ts_electricity_price[,"All.sectors"], series="Original")+
 
 
 # Model 10:  ARIMA on deseasonal data
-model_10 <- auto.arima(deseasonal_allsectors_price)
+model_10 <- auto.arima(deseasonal_allsectors_price, seasonal=FALSE)
 model_10_forecast <- forecast(model_10, h=12)
 plot(model_10_forecast)
 autoplot(deseasonal_allsectors_price, series="Deseasonal")+
