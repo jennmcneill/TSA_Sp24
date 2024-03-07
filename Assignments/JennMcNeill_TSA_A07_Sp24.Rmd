@@ -135,6 +135,8 @@ Using the plots from Q2 and test results from Q3 identify the ARIMA model parame
 
 ```{r}
 
+
+
 ```
 
 ### Q5
@@ -142,6 +144,8 @@ Using the plots from Q2 and test results from Q3 identify the ARIMA model parame
 Use `Arima()` from package "forecast" to fit an ARIMA model to your series considering the order estimated in Q4. You should allow constants in the model, i.e., `include.mean = TRUE` or `include.drift=TRUE`. **Print the coefficients** in your report. Hint: use the `cat()` r `print()` function to print.
 
 ```{r}
+
+
 
 ```
 
