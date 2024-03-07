@@ -226,8 +226,8 @@ model_10 <- auto.arima(deseasonal_allsectors_price, seasonal=FALSE)
 model_10_forecast <- forecast(model_10, h=12)
 plot(model_10_forecast)
 autoplot(deseasonal_allsectors_price, series="Deseasonal")+
-  autolayer(model_10$fitted,series="SARIMA")+
-  autolayer(model_10_forecast$mean,series="SARIMA_forecast")
+  autolayer(model_10$fitted,series="ARIMA")+
+  autolayer(model_10_forecast$mean,series="ARIMA_forecast")
 
 ```
 
