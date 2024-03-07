@@ -4,6 +4,8 @@ subtitle: "Assignment 7 - Due date 03/07/24"
 author: "Jenn McNeill"
 output: pdf_document
 geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
 ---
 
 ## Directions
@@ -23,6 +25,17 @@ Packages needed for this assignment: "forecast","tseries". Do not forget to load
 ```{r}
 #Load/install required package here
 
+library(lubridate)
+library(ggplot2)
+library(forecast)  
+library(Kendall)
+library(tseries)
+library(outliers)
+library(tidyverse)
+library(smooth)
+library(dplyr)
+library(cowplot)
+
 ```
 
 ## Importing and processing the data set
@@ -36,6 +49,48 @@ Import the csv file and create a time series object for natural gas. Make you su
 
 ```{r}
 
+getwd()
+
+#Import data
+net_generation <- read.csv(file="./Data/Net_generation_United_States_all_sectors_monthly.csv",
+                           header=TRUE, skip=4)
+
+#Inspect data
+head(net_generation)
+nvar <- ncol(net_generation) - 1
+nobs <- nrow(net_generation)
+
+#Create a processed dataframe
+natural_gas_processed <-
+  net_generation %>%
+  mutate( Month = my(Month) ) %>% 
+  select( Month, natural.gas.thousand.megawatthours) %>%
+  rename( natural_gas = natural.gas.thousand.megawatthours ) %>% 
+  arrange( Month )
+
+#Check for NA
+head(natural_gas_processed)
+summary(natural_gas_processed)
+#No NA detected
+
+#Create a time series object
+ts_natural_gas <- ts(natural_gas_processed[,2],
+                     start=c(year(natural_gas_processed$Month[1]),
+                             month(natural_gas_processed$Month[1])),
+                             frequency=12) 
+
+#Check head and tail of the time series object
+head(ts_natural_gas,15)
+tail(ts_natural_gas,15)
+
+#Plot the time series over time, ACF, and PACF
+plot_grid(
+  autoplot((ts_natural_gas), main = "original TS"),
+  autoplot(Acf(ts_natural_gas, lag = 40, plot=FALSE), main = "original ACF"),
+  autoplot(Pacf(ts_natural_gas, lag = 40, plot=FALSE), main = "original PACF"),
+  ncol=3
+)
+
 ```
 
 ### Q2
@@ -43,6 +98,16 @@ Import the csv file and create a time series object for natural gas. Make you su
 Using the $decompose()$ or $stl()$ and the $seasadj()$ functions create a series without the seasonal component, i.e., a deseasonalized natural gas series. Plot the deseasonalized series over time and corresponding ACF and PACF. Compare with the plots obtained in Q1.
 
 ```{r}
+
+decompose_natural_gas <- decompose(ts_natural_gas,"additive")
+deseasonal_natural_gas <- seasadj(decompose_natural_gas) 
+
+plot_grid(
+  autoplot((deseasonal_natural_gas), main = "deseasonal TS"),
+  autoplot(Acf(deseasonal_natural_gas, lag = 40, plot=FALSE), main = "deseasonal ACF"),
+  autoplot(Pacf(deseasonal_natural_gas, lag = 40, plot=FALSE), main = "deseasonal PACF"),
+  ncol=3
+)
 
 ```
 
@@ -54,7 +119,15 @@ Run the ADF test and Mann Kendall test on the deseasonalized data from Q2. Repor
 
 ```{r}
 
+MK_deseasonal_natural_gas <- MannKendall(deseasonal_natural_gas)
+print(summary(MK_deseasonal_natural_gas))
+
+ADF_deseasonal_natural_gas <- adf.test(deseasonal_natural_gas,alternative="stationary")
+print(ADF_deseasonal_natural_gas)
+
 ```
+
+The results of the Seasonal Mann Kendall show that there is a trend in the data because the p-value is 2.22e-16, which is less than .05. According to this p-value, we can reject the null hypothesis that there is no trend. Additionally, the score is positive, which means that the trend is increasing. This matches what I observed when plotting the time series, which is that the series has a positive trend. The ADF results in a p-value of 0.01, which is less than .05. This means we reject the null hypothesis that the series is non-stationary, and we can assume that there is not a stochastic trend. 
 
 ### Q4
 
