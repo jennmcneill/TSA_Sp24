@@ -42,7 +42,6 @@ library(cowplot)
 
 Consider the data from the file "Net_generation_United_States_all_sectors_monthly.csv". The data corresponds to the monthly net generation from January 2001 to December 2020 by source and is provided by the US Energy Information and Administration. **You will work with the natural gas column only**.
 
-
 ### Q1
 
 Import the csv file and create a time series object for natural gas. Make you sure you specify the **start=** and **frequency=** arguments. Plot the time series over time, ACF and PACF.
@@ -111,6 +110,8 @@ plot_grid(
 
 ```
 
+These plots are different than the plots obtained in Q1 because they have removed seasonality as a factor. The time series no longer shows evenly spaced fluctuations, the ACF plot shows a steady decay, and the PACF plot shows one significant lag.
+
 ## Modeling the seasonally adjusted or deseasonalized series
 
 ### Q3
@@ -127,17 +128,13 @@ print(ADF_deseasonal_natural_gas)
 
 ```
 
-The results of the Seasonal Mann Kendall show that there is a trend in the data because the p-value is 2.22e-16, which is less than .05. According to this p-value, we can reject the null hypothesis that there is no trend. Additionally, the score is positive, which means that the trend is increasing. This matches what I observed when plotting the time series, which is that the series has a positive trend. The ADF results in a p-value of 0.01, which is less than .05. This means we reject the null hypothesis that the series is non-stationary, and we can assume that there is not a stochastic trend. 
+The results of the Seasonal Mann Kendall show that there is a trend in the data because the p-value is 2.22e-16, which is less than .05. According to this p-value, we can reject the null hypothesis that there is no trend. Additionally, the score is positive, which means that the trend is increasing. This matches what I observed when plotting the time series, which is that the series has a positive trend over time. The ADF results in a p-value of 0.01, which is less than .05. This means we reject the null hypothesis that the series is non-stationary and we know that we will have to difference the series to achieve stationarity. 
 
 ### Q4
 
 Using the plots from Q2 and test results from Q3 identify the ARIMA model parameters $p,d$ and $q$. Note that in this case because you removed the seasonal component prior to identifying the model you don't need to worry about seasonal component. Clearly state your criteria and any additional function in R you might use. DO NOT use the $auto.arima()$ function. You will be evaluated on ability to understand the ACF/PACF plots and interpret the test results.
 
-```{r}
-
-
-
-```
+The results from the ADF test tell me that I have to difference the series to achieve stationarity, so I know that my d order will be non-zero in my ARIMA model. Since the deseasonal ACF has non-zero autocorrelation values that decay with the lag and the deseasonal PACF has one significant lag, I am assuming that this is an AR process and will assume that my p order will also be non-zero. The MA term will be trial and error.
 
 ### Q5
 
@@ -145,13 +142,47 @@ Use `Arima()` from package "forecast" to fit an ARIMA model to your series consi
 
 ```{r}
 
+Model_111 <- Arima(deseasonal_natural_gas,order=c(1,1,1),include.drift=TRUE)
+print(Model_111)
+compare_aic <- data.frame(Model_111$aic)
 
+Model_011 <- Arima(deseasonal_natural_gas,order=c(0,1,1),include.drift=TRUE)
+print(Model_011)
+compare_aic <- data.frame(compare_aic,Model_011$aic)
+
+Model_211 <- Arima(deseasonal_natural_gas,order=c(2,1,1),include.drift=TRUE)
+print(Model_211)
+compare_aic <- data.frame(compare_aic,Model_211$aic)
+
+Model_112 <- Arima(deseasonal_natural_gas,order=c(1,1,2),include.drift=TRUE)
+print(Model_112)
+compare_aic <- data.frame(compare_aic,Model_112$aic)
+
+Model_212 <- Arima(deseasonal_natural_gas,order=c(2,1,2),include.drift=TRUE)
+print(Model_212)
+compare_aic <- data.frame(compare_aic,Model_212$aic)
+
+print(compare_aic)
 
 ```
+
+In the ARIMA that is the best fit, we want the residuals to be white noise centered at 0 with no time dependence between the error. The error at t should not depend on error at t-1. The ACF and PACF plots should have insignificant coefficients always between the two dashed lines. The value for the AIC will be the lowest in the ARIMA that is the best fit. I predict that order (2,1,2) will be the best fit in this case because it best meets the above criteria the best and has the lowest AIC value of the five orders that I tested.
 
 ### Q6
 
 Now plot the residuals of the ARIMA fit from Q5 along with residuals ACF and PACF on the same window. You may use the $checkresiduals()$ function to automatically generate the three plots. Do the residual series look like a white noise series? Why?
+
+```{r}
+
+plot_grid(
+  autoplot(Model_212$residuals),
+  autoplot(Acf(Model_212$residuals,lag.max=40, plot = FALSE)),
+  autoplot(Pacf(Model_212$residuals,lag.max=40, plot = FALSE)),
+  nrow=1)
+
+```
+
+The residual series does look like a white noise series! It is centered at zero and appears to have minimums and maximums at randomly spaced time increments.
 
 ## Modeling the original series (with seasonality)
 
@@ -159,7 +190,40 @@ Now plot the residuals of the ARIMA fit from Q5 along with residuals ACF and PAC
 
 Repeat Q4-Q6 for the original series (the complete series that has the seasonal component). Note that when you model the seasonal series, you need to specify the seasonal part of the ARIMA model as well, i.e., $P$, $D$ and $Q$.
 
+The results from the ADF test tell me that I have to difference the series to achieve stationarity. I will use ndiffs() and nsdiffs() to determine the number of times I should difference seasonally and non-seasonally, and I assume that my d order and D order will both be non-zero. Since the original ACF has non-zero autocorrelation values that decay with the lag and show seasonal patterns and the original PACF has significant lags with a cutoff, I am assuming that this is an AR process and will assume that my p order and P order will also be non-zero. The MA terms q and Q will be trial and error.
+
 ```{r}
+
+n_diff <- ndiffs(ts_natural_gas)
+ns_diff <- nsdiffs(ts_natural_gas)
+
+Model_111011 <- Arima(ts_natural_gas,order=c(1,1,1),seasonal=c(0,1,1),include.drift=FALSE)
+print(Model_111011)
+compare_aic_seas <- data.frame(Model_111011$aic)
+
+Model_111110 <- Arima(ts_natural_gas,order=c(1,1,1),seasonal=c(1,1,0),include.drift=FALSE)
+print(Model_111110)
+compare_aic_seas <- data.frame(compare_aic_seas,Model_111110$aic)
+
+Model_110110 <- Arima(ts_natural_gas,order=c(1,1,0),seasonal=c(1,1,0),include.drift=FALSE)
+print(Model_110110)
+compare_aic_seas <- data.frame(compare_aic_seas,Model_110110$aic)
+
+Model_011110 <- Arima(ts_natural_gas,order=c(0,1,1),seasonal=c(1,1,0),include.drift=FALSE)
+print(Model_011110)
+compare_aic_seas <- data.frame(compare_aic_seas,Model_011110$aic)
+
+Model_212011 <- Arima(ts_natural_gas,order=c(2,1,2),seasonal=c(0,1,1),include.drift=FALSE)
+print(Model_212011)
+compare_aic_seas <- data.frame(compare_aic_seas,Model_212011$aic)
+
+print(compare_aic_seas)
+
+plot_grid(
+  autoplot(Model_111011$residuals),
+  autoplot(Acf(Model_111011$residuals,lag.max=40, plot = FALSE)),
+  autoplot(Pacf(Model_111011$residuals,lag.max=40, plot = FALSE)),
+  nrow=1)
 
 ```
 
@@ -170,8 +234,14 @@ Compare the residual series for Q7 and Q6. Can you tell which ARIMA model is bet
 
 ```{r}
 
+plot_grid(
+  autoplot(Model_212$residuals),
+  autoplot(Model_111011$residuals),
+  nrow=1)
+
 ```
 
+I cannot tell which ARIMA model is better representing the natural gas series because both of the residuals are white noise. Both plots show residuals centered around zero and no patterns of detected seasonality. It is difficult to compare the seasonal Arima and non-seasonal Arima because both of these models can be good fits for the data depending on whether the seasonality is a term that can be reliably removed. Removing the seasonality before modeling the Arima has benefits if you feel confident in your ability to remove it accurately. Keeping the seasonality in and modeling with it as a component may be a safer option, but if the seasonality is not all perfectly spaced in 12 month increments, it might actually be introducing more error into the model. 
 
 ## Checking your model with the auto.arima()
 
@@ -183,8 +253,12 @@ Use the $auto.arima()$ command on the **deseasonalized series** to let R choose 
 
 ```{r}
 
+deseasonal_autofit <- auto.arima(deseasonal_natural_gas,max.D=0,max.P=0,max.Q=0)
+print(deseasonal_autofit)
+
 ```
 
+The order of the best ARIMA model is (1,1,1) with drift. I had modeled that the AIC values for orders (1,1,1) with drift and (2,1,2) with drift were almost exactly the same, so I am not surprised that the Auto ARIMA gave (1,1,1) as the best order. 
 
 ### Q10
 
@@ -192,5 +266,9 @@ Use the $auto.arima()$ command on the **original series** to let R choose the mo
 
 ```{r}
 
+seasonal_autofit <- auto.arima(ts_natural_gas)
+print(seasonal_autofit)
+
 ```
 
+The order of the best seasonal ARIMA model is (1,0,0)(0,1,1)[12] with drift. This differs from the order that I specified in Q7, which was (1,0,0)(0,1,1)[12]. I am surprised to see that the moving average non-seasonal term has been removed when the auto ARIMA fits the model. 

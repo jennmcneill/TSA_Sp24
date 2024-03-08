@@ -258,8 +258,7 @@ plot_grid(
   autoplot(Model_211$residuals),
   autoplot(Acf(Model_211$residuals,lag.max=40, plot = FALSE)),
   autoplot(Pacf(Model_211$residuals,lag.max=40, plot = FALSE)),
-  nrow=1
-)
+  nrow=1)
 
 compare_aic
 #remember that the middle term always has to stay 1 because we are doing the differencing. we want the aic to be the lowest as possible. so far, the 011 is the best fit because the number is the lowest.
@@ -338,13 +337,7 @@ autoplot(deseasonal_residential_price,series="Observed")+
   autolayer(Model_211$fitted,series="ARIMA(2,1,1)")+
   autolayer(Model_212$fitted,series="ARIMA(2,1,2)")+
   autolayer(Model_011$fitted,series="ARIMA(0,1,1)")
-<<<<<<< HEAD
-=======
 
-
-
-
->>>>>>> 24e360d003f485194c259ab9e60f55b59c2df0d0
 ```
 This is still non-seasonal data. If you want to compare to original series, you need to add seasonal component back.
 
