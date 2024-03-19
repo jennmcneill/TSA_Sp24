@@ -134,7 +134,14 @@ The results of the Seasonal Mann Kendall show that there is a trend in the data 
 
 Using the plots from Q2 and test results from Q3 identify the ARIMA model parameters $p,d$ and $q$. Note that in this case because you removed the seasonal component prior to identifying the model you don't need to worry about seasonal component. Clearly state your criteria and any additional function in R you might use. DO NOT use the $auto.arima()$ function. You will be evaluated on ability to understand the ACF/PACF plots and interpret the test results.
 
-The results from the ADF test tell me that I have to difference the series to achieve stationarity, so I know that my d order will be non-zero in my ARIMA model. Since the deseasonal ACF has non-zero autocorrelation values that decay with the lag and the deseasonal PACF has one significant lag, I am assuming that this is an AR process and will assume that my p order will also be non-zero. The MA term will be trial and error.
+```{r}
+
+n_diff <- ndiffs(ts_natural_gas)
+
+```
+
+
+The results from the ADF test tell me that I have to difference the series to achieve stationarity, so I know that my d order will be non-zero in my ARIMA model. I will run the ndiffs() function to see how many times I should difference. Since the deseasonal ACF has non-zero autocorrelation values that decay with the lag and the deseasonal PACF has one significant lag, I am assuming that this is an AR process and will assume that my p order will also be non-zero. The MA term will be trial and error.
 
 ### Q5
 
@@ -190,11 +197,10 @@ The residual series does look like a white noise series! It is centered at zero 
 
 Repeat Q4-Q6 for the original series (the complete series that has the seasonal component). Note that when you model the seasonal series, you need to specify the seasonal part of the ARIMA model as well, i.e., $P$, $D$ and $Q$.
 
-The results from the ADF test tell me that I have to difference the series to achieve stationarity. I will use ndiffs() and nsdiffs() to determine the number of times I should difference seasonally and non-seasonally, and I assume that my d order and D order will both be non-zero. Since the original ACF has non-zero autocorrelation values that decay with the lag and show seasonal patterns and the original PACF has significant lags with a cutoff, I am assuming that this is an AR process and will assume that my p order and P order will also be non-zero. The MA terms q and Q will be trial and error.
+The results from the ADF test tell me that I have to difference the series to achieve stationarity. I will use ndiffs() and nsdiffs() to determine the number of times I should difference seasonally and non-seasonally, and I assume that my d order and D order will both be non-zero. Since the original ACF has non-zero autocorrelation values that decay with the lag and show seasonal patterns and the original PACF has significant lags with a cutoff, I am assuming that this is an SAR process and will assume that my p order and P order will also be non-zero. The seasonal lags occur at increments of 12 lags. The MA terms q and Q will be trial and error. I remember that with seasonal ARIMAs you can only have a P term or a Q term. I expect to see a P term instead of a Q term because the ACF shows multiple seasonal lags and decays over time. 
 
 ```{r}
 
-n_diff <- ndiffs(ts_natural_gas)
 ns_diff <- nsdiffs(ts_natural_gas)
 
 Model_111011 <- Arima(ts_natural_gas,order=c(1,1,1),seasonal=c(0,1,1),include.drift=FALSE)
@@ -271,4 +277,4 @@ print(seasonal_autofit)
 
 ```
 
-The order of the best seasonal ARIMA model is (1,0,0)(0,1,1)[12] with drift. This differs from the order that I specified in Q7, which was (1,0,0)(0,1,1)[12]. I am surprised to see that the moving average non-seasonal term has been removed when the auto ARIMA fits the model. 
+The order of the best seasonal ARIMA model is (1,0,0)(0,1,1)[12] with drift. This differs from the order that I specified in Q7, which was (1,1,1)(0,1,1)[12]. I am surprised to see that the moving average non-seasonal term has been removed when the auto ARIMA fits the model. I am also surprised to see that the auto ARIMA does not detect a seasonal autoregressive term. 
