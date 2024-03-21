@@ -143,6 +143,9 @@ n_diff <- ndiffs(ts_natural_gas)
 
 The results from the ADF test tell me that I have to difference the series to achieve stationarity, so I know that my d order will be non-zero in my ARIMA model. I will run the ndiffs() function to see how many times I should difference. Since the deseasonal ACF has non-zero autocorrelation values that decay with the lag and the deseasonal PACF has one significant lag, I am assuming that this is an AR process and will assume that my p order will also be non-zero. The MA term will be trial and error.
 
+
+#at this point, we should have differenced the series and then checked the ACF and PACF of the differenced series. you can only get an MA term once you have differenced the series, so it was wrong for me to say that the MA term here would be trial and error. I should have said (1,1,0) because I knew I needed differencing and I knew that it was AR.
+
 ### Q5
 
 Use `Arima()` from package "forecast" to fit an ARIMA model to your series considering the order estimated in Q4. You should allow constants in the model, i.e., `include.mean = TRUE` or `include.drift=TRUE`. **Print the coefficients** in your report. Hint: use the `cat()` r `print()` function to print.
