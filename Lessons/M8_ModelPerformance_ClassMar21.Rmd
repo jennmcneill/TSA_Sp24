@@ -23,9 +23,9 @@ Second R code chunk is for loading packages. By setting message = FALSE, the cod
 library(lubridate)
 library(ggplot2)
 library(forecast)  
-#library(Kendall)
+library(Kendall)
 library(tseries)
-#library(outliers)
+library(outliers)
 library(tidyverse)
 library(smooth)
 
