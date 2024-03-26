@@ -59,7 +59,7 @@ The `ts()` function we have been using to create time series objects can only ha
 
 df_frequency_spec <- data.frame(
   Data = c("Annual", "Quartely","Monthly","Weekly"),
-  Frequency = c(1,2,12,52)
+  Frequency = c(1,4,12,52)
 )
 
 kbl(df_frequency_spec, caption="Frequency used with ts() function") %>% 
@@ -166,7 +166,7 @@ ggplot(act_power_daily, aes(x=Date,y=daily_mean_active_power)) +
 
 summary(act_power_daily$daily_mean_active_power)
 
-#no NAs
+#no NAs. if you still have NA after aggregation, then you need to use the TS Clean function.
 ```
 
 ## Transforming both series into time series objects
@@ -183,7 +183,8 @@ Recall from `ts()` function that frequency is the number of observation per seas
 ```{r message=FALSE, warning=FALSE}
 ts_act_power_hourly <- msts(act_power_hourly$hourly_mean_active_power, 
                             seasonal.periods =c(24,168,8766),
-                            start=c(2006,12,16))
+                            start=c(2006,12,16)) 
+#hour may need to be specified because the df starts at hour 17 on 12/16
 
 ts_act_power_daily <- msts(act_power_daily$daily_mean_active_power, 
                            seasonal.periods =c(7,365.25),
@@ -222,10 +223,12 @@ Start by creating a subset of the time series to fit the models and leave observ
 n_for = 365
 ts_act_power_daily_train <- subset(ts_act_power_daily,
                                    end = length(ts_act_power_daily)-n_for)
+#exclude the last year
 
 #create a subset for testing purpose
 ts_act_power_daily_test <- subset(ts_act_power_daily,
                                    start = length(ts_act_power_daily)-n_for)
+#only include the last year
 
 autoplot(ts_act_power_daily_train)
 autoplot(ts_act_power_daily_test)
@@ -248,12 +251,13 @@ Other functions to explore: `es()`, `ets()`, `hw()`
 ETS_fit <-  stlf(ts_act_power_daily_train,h=365)
 
 #Plot foresting results
-autoplot(ETS_fit) + ylab("Active Power")
+autoplot(ETS_fit) + ylab("Active Power") + theme_light()
 
 #Plot model + observed data
 autoplot(ts_act_power_daily) +
   autolayer(ETS_fit, series="STL + ETS",PI=FALSE) +
-  ylab("Active Power")
+  ylab("Active Power") +
+  theme_light()
 
 #alternative coding if you don't need to save the objects
 #ts_act_power_daily_train %>% stlf(h=365) %>% autoplot() 
@@ -274,6 +278,7 @@ Fourier terms are used to model the seasonal components. It resembles the season
 # seasonal = FALSE is the same as P=D=Q=0
 # play with K by changing it to K=c(2,2), K=c(2,4), K=c(2,6), etc. The higher teh K the longer it will take to converge, because R will try more models.
 
+#seasonal=false because you have to say it's not seasonal when you have multiple seasonalities. it can't handle multiple, so we are adding external regressors to account for the different seasonalities. the fourier() function allows us to provide information about our different seasonalities that we want to consider in the forecast. K() means that to model the seasonal weekly pattern, we only need 2 terms. one for week days, one for weekend. The 12 shows the number of months. aka these are the minimum numbers of harmonics that we might need. You can try changing the K and seeing if you get a better fit. The fewer terms, the better the model. autoarima doesn't give you forecast, it just gives you the fit of the ts you have.
 ARIMA_Four_fit <- auto.arima(ts_act_power_daily_train, 
                              seasonal=FALSE, 
                              lambda=0,
@@ -282,7 +287,7 @@ ARIMA_Four_fit <- auto.arima(ts_act_power_daily_train,
                              )
 
 #Forecast with ARIMA fit
-#also need to specify h for fourier terms
+#also need to specify h for fourier terms. the h= is showing that you want 365 forecasts of the forecast function. this gives us forecast for the fourier terms. if you want to change the (2,12) you need to change it above too. h= and h= comes twice because one is for the forecast function and the other is for the fourier function. **the fit and the forecast come separately when using the autoarima!!!**
 ARIMA_Four_for <- forecast(ARIMA_Four_fit,
                            xreg=fourier(ts_act_power_daily_train,
                                         K=c(2,12),
@@ -291,12 +296,13 @@ ARIMA_Four_for <- forecast(ARIMA_Four_fit,
                            ) 
 
 #Plot foresting results
-autoplot(ARIMA_Four_for) + ylab("Active Power")
+autoplot(ARIMA_Four_for) + ylab("Active Power") + theme_light()
 
 #Plot model + observed data
 autoplot(ts_act_power_daily) +
   autolayer(ARIMA_Four_for, series="ARIMA_FOURIER",PI=FALSE) +
-  ylab("Active Power")
+  ylab("Active Power") +
+  theme_light()
 
 ```
 
