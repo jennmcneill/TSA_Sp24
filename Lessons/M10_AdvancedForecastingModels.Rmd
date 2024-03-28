@@ -344,6 +344,9 @@ For non-seasonal data, the fitted model is denoted as an NNAR(p,k) model, where 
 #NN_fit <- nnetar(ts_act_power_daily_train,p=1,P=1)
 NN_fit <- nnetar(ts_act_power_daily_train,p=1,P=0,xreg=fourier(ts_act_power_daily_train, K=c(2,12)))
 
+## in the xreg argument you would add the cbind argument and bind any other regressor like another variable
+## when you call the forecast function you also need to make sure that you are forecasting the regressors as well, that's where the "h" comes into play
+
 #NN_for <- forecast(NN_fit, h=365) 
 NN_for <- forecast(NN_fit, h=365,xreg=fourier(ts_act_power_daily_train, 
                                           K=c(2,12),h=365))
