@@ -189,10 +189,17 @@ The function takes a few arguments, here are the important ones:
 
 
 ```{r}
-SS_seas <- StructTS(ts_price,
-                    type="BSM",fixed=c(0.001,0.01,0.3,NA)) 
 
+SS_seas <- StructTS(ts_price,
+                    type="BSM",fixed=c(NA,NA,NA,NA)) 
+checkresiduals(SS_seas)
+
+SS_seas_new <- StructTS(ts_price,
+                    type="BSM",fixed=c(0.001,0.01,0.3,NA)) 
+#bsm = basic structural model which can fit seasonal components and trends
 #this function has convergence issues
+#this is with me trying to figure out the constants myself
+#changing the variance of the seasonal component will make the confidence interval change
 checkresiduals(SS_seas)
 
 #SS_seas <- StructTS(ts_price,
@@ -285,6 +292,7 @@ autoplot(ts_electricity_price[,"All.sectors"]) +
   autolayer(SSES_seas$forecast, series="SSES") +
   autolayer(SS_for,PI=FALSE,series="BSM") + 
   xlab("Month") + ylab("Electricity Retail Price ($/kWh)") +
-  guides(colour=guide_legend(title="Forecast"))
+  guides(colour=guide_legend(title="Forecast")) +
+  theme_light()
 ```
 
