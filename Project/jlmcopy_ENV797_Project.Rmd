@@ -290,38 +290,44 @@ Each figure should be accompanied by a caption, and referenced within the text i
 
 ```{r }
 
-# #plot the ACF and PACF for south well LT2
-# plot_grid(
-#   autoplot(Acf(ts_LT2_clean,lag.max=80,plot=FALSE), 
-#            main = "TS LT2 Depth to Groundwater") + theme_light(),
-#   autoplot(Pacf(ts_LT2_clean,lag.max=80,plot=FALSE), 
-#            main = "TS LT2 Depth to Groundwater") + theme_light())
-# 
-# #plot the ACF and PACF for north well SAL
-# plot_grid(
-#   autoplot(Acf(ts_SAL_clean,lag.max=80,plot=FALSE), 
-#            main = "TS SAL Depth to Groundwater") + theme_light(),
-#   autoplot(Pacf(ts_SAL_clean,lag.max=80,plot=FALSE), 
-#            main = "TS SAL Depth to Groundwater") + theme_light())
+#plot the ACF and PACF for south well LT2
+plot_grid(
+  autoplot(Acf(ts_LT2_clean,lag.max=1825,plot=FALSE),
+           main = "TS LT2 Depth to Groundwater") + theme_light(),
+  autoplot(Pacf(ts_LT2_clean,lag.max=1825,plot=FALSE),
+           main = "TS LT2 Depth to Groundwater") + theme_light())
+
+#plot the ACF and PACF for north well SAL
+plot_grid(
+  autoplot(Acf(ts_SAL_clean,lag.max=1825,plot=FALSE),
+           main = "TS SAL Depth to Groundwater") + theme_light(),
+  autoplot(Pacf(ts_SAL_clean,lag.max=1825,plot=FALSE),
+           main = "TS SAL Depth to Groundwater") + theme_light())
 
 ```
 
 ```{r}
 
-# #decompose the time series for south well LT2 using additive and multiplicative methods
-# decompose_ts_LT2_add <- decompose(ts_LT2_clean,"additive")
-# plot(decompose_ts_LT2_add)
-# 
-# decompose_ts_LT2_mult <- decompose(ts_LT2_clean,"multiplicative")
-# plot(decompose_ts_LT2_mult)
-# 
-# #decompose the time series for north well SAL using additive and multiplicative methods
-# decompose_ts_SAL_add <- decompose(ts_SAL_clean,"additive")
-# plot(decompose_ts_SAL_add)
-# 
-# decompose_ts_SAL_mult <- decompose(ts_SAL_clean,"multiplicative")
-# plot(decompose_ts_SAL_mult)
+#decompose the time series for south well LT2 using additive and multiplicative methods
+decompose_ts_LT2_add <- decompose(ts_LT2_clean,"additive")
+plot(decompose_ts_LT2_add)
 
+decompose_ts_LT2_mult <- decompose(ts_LT2_clean,"multiplicative")
+plot(decompose_ts_LT2_mult)
+
+#decompose the time series for north well SAL using additive and multiplicative methods
+decompose_ts_SAL_add <- decompose(ts_SAL_clean,"additive")
+plot(decompose_ts_SAL_add)
+
+decompose_ts_SAL_mult <- decompose(ts_SAL_clean,"multiplicative")
+plot(decompose_ts_SAL_mult)
+
+#plot the ACF and PACF for south well LT2 detrended
+plot_grid(
+  autoplot(Acf((decompose_ts_LT2_add$random),lag.max=80,plot=FALSE),
+           main = "TS LT2 Depth to Groundwater") + theme_light(),
+  autoplot(Pacf((ts_LT2_clean-decompose_ts_LT2_add$trend-decompose_ts_LT2_add$seasonal),lag.max=80,plot=FALSE),
+           main = "TS LT2 Depth to Groundwater") + theme_light())
 ```
 
 ```{r}
