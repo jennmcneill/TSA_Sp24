@@ -43,7 +43,7 @@ The dataset for the Auser Aquifer includes daily depth to groundwater measuremen
 getwd()
 
 #import data set
-auser_raw <- read.csv(file="./Data/Raw/Aquifer_Auser.csv", header=TRUE)
+auser_raw <- read.csv(file="./Project/Data/Raw/Aquifer_Auser.csv", header=TRUE)
 
 #change date to date object
 auser_raw$Date <- dmy(auser_raw$Date) 
@@ -290,105 +290,105 @@ Each figure should be accompanied by a caption, and referenced within the text i
 
 ```{r }
 
-#plot the ACF and PACF for south well LT2
-plot_grid(
-  autoplot(Acf(ts_LT2_clean,lag.max=80,plot=FALSE), 
-           main = "TS LT2 Depth to Groundwater") + theme_light(),
-  autoplot(Pacf(ts_LT2_clean,lag.max=80,plot=FALSE), 
-           main = "TS LT2 Depth to Groundwater") + theme_light())
-
-#plot the ACF and PACF for north well SAL
-plot_grid(
-  autoplot(Acf(ts_SAL_clean,lag.max=80,plot=FALSE), 
-           main = "TS SAL Depth to Groundwater") + theme_light(),
-  autoplot(Pacf(ts_SAL_clean,lag.max=80,plot=FALSE), 
-           main = "TS SAL Depth to Groundwater") + theme_light())
-
-```
-
-```{r}
-
-#decompose the time series for south well LT2 using additive and multiplicative methods
-decompose_ts_LT2_add <- decompose(ts_LT2_clean,"additive")
-plot(decompose_ts_LT2_add)
-
-decompose_ts_LT2_mult <- decompose(ts_LT2_clean,"multiplicative")
-plot(decompose_ts_LT2_mult)
-
-#decompose the time series for north well SAL using additive and multiplicative methods
-decompose_ts_SAL_add <- decompose(ts_SAL_clean,"additive")
-plot(decompose_ts_SAL_add)
-
-decompose_ts_SAL_mult <- decompose(ts_SAL_clean,"multiplicative")
-plot(decompose_ts_SAL_mult)
+# #plot the ACF and PACF for south well LT2
+# plot_grid(
+#   autoplot(Acf(ts_LT2_clean,lag.max=80,plot=FALSE), 
+#            main = "TS LT2 Depth to Groundwater") + theme_light(),
+#   autoplot(Pacf(ts_LT2_clean,lag.max=80,plot=FALSE), 
+#            main = "TS LT2 Depth to Groundwater") + theme_light())
+# 
+# #plot the ACF and PACF for north well SAL
+# plot_grid(
+#   autoplot(Acf(ts_SAL_clean,lag.max=80,plot=FALSE), 
+#            main = "TS SAL Depth to Groundwater") + theme_light(),
+#   autoplot(Pacf(ts_SAL_clean,lag.max=80,plot=FALSE), 
+#            main = "TS SAL Depth to Groundwater") + theme_light())
 
 ```
 
 ```{r}
 
-#HONESTY ZONE EMMA I DONT REALLY UNDERSTAND THIS I COPIED IT FROM ASSIGNMENT 7 ANSWER KEY
-
-#create deseasoned time series objects
-ts_LT2_deseas <- seasadj(decompose_ts_LT2_add)
-
-plot_grid(
-  autoplot(Acf(ts_LT2_deseas,lag.max=80,plot=FALSE), 
-           main = "TS LT2 Depth to Groundwater") + theme_light(),
-  autoplot(Pacf(ts_LT2_deseas,lag.max=80,plot=FALSE), 
-           main = "TS LT2 Depth to Groundwater") + theme_light())
-#we do not observe much change in the ACF or PACF plots when we deseason
-
-print(adf.test(ts_LT2_deseas))
-
-#ADF test shows a p-value of 0.95. We fail to reject the null hypothesis. The deseasoned series may have a stochastic trend.
-
-summary(MannKendall(ts_LT2_deseas))
-
-#Mann Kendall test p-value indicates we should reject the null hypothesis. Data has a deterministic trend.
-
-ts_SAL_deseas <- seasadj(decompose_ts_SAL_add)
-
-plot_grid(
-  autoplot(Acf(ts_SAL_deseas,lag.max=80,plot=FALSE), 
-           main = "TS LT2 Depth to Groundwater") + theme_light(),
-  autoplot(Pacf(ts_SAL_deseas,lag.max=80,plot=FALSE), 
-           main = "TS LT2 Depth to Groundwater") + theme_light())
-#we do not observe much change in the ACF or PACF plots when we deseason
-
-print(adf.test(ts_SAL_deseas))
-
-#ADF test shows a p-value of 0.01. We reject the null hypothesis. The deseasoned series does not have a stochastic trend.
-
-summary(MannKendall(ts_SAL_deseas))
-
-#Mann Kendall test p-value indicates we should reject the null hypothesis. Data has a deterministic trend.
+# #decompose the time series for south well LT2 using additive and multiplicative methods
+# decompose_ts_LT2_add <- decompose(ts_LT2_clean,"additive")
+# plot(decompose_ts_LT2_add)
+# 
+# decompose_ts_LT2_mult <- decompose(ts_LT2_clean,"multiplicative")
+# plot(decompose_ts_LT2_mult)
+# 
+# #decompose the time series for north well SAL using additive and multiplicative methods
+# decompose_ts_SAL_add <- decompose(ts_SAL_clean,"additive")
+# plot(decompose_ts_SAL_add)
+# 
+# decompose_ts_SAL_mult <- decompose(ts_SAL_clean,"multiplicative")
+# plot(decompose_ts_SAL_mult)
 
 ```
 
 ```{r}
 
-#auto arima with orginal LT2 series
-LT2_auto <- auto.arima(ts_LT2_clean)
-summary(LT2_auto)
+# #HONESTY ZONE EMMA I DONT REALLY UNDERSTAND THIS I COPIED IT FROM ASSIGNMENT 7 ANSWER KEY
+# 
+# #create deseasoned time series objects
+# ts_LT2_deseas <- seasadj(decompose_ts_LT2_add)
+# 
+# plot_grid(
+#   autoplot(Acf(ts_LT2_deseas,lag.max=80,plot=FALSE), 
+#            main = "TS LT2 Depth to Groundwater") + theme_light(),
+#   autoplot(Pacf(ts_LT2_deseas,lag.max=80,plot=FALSE), 
+#            main = "TS LT2 Depth to Groundwater") + theme_light())
+# #we do not observe much change in the ACF or PACF plots when we deseason
+# 
+# print(adf.test(ts_LT2_deseas))
+# 
+# #ADF test shows a p-value of 0.95. We fail to reject the null hypothesis. The deseasoned series may have a stochastic trend.
+# 
+# summary(MannKendall(ts_LT2_deseas))
+# 
+# #Mann Kendall test p-value indicates we should reject the null hypothesis. Data has a deterministic trend.
+# 
+# ts_SAL_deseas <- seasadj(decompose_ts_SAL_add)
+# 
+# plot_grid(
+#   autoplot(Acf(ts_SAL_deseas,lag.max=80,plot=FALSE), 
+#            main = "TS LT2 Depth to Groundwater") + theme_light(),
+#   autoplot(Pacf(ts_SAL_deseas,lag.max=80,plot=FALSE), 
+#            main = "TS LT2 Depth to Groundwater") + theme_light())
+# #we do not observe much change in the ACF or PACF plots when we deseason
+# 
+# print(adf.test(ts_SAL_deseas))
+# 
+# #ADF test shows a p-value of 0.01. We reject the null hypothesis. The deseasoned series does not have a stochastic trend.
+# 
+# summary(MannKendall(ts_SAL_deseas))
+# 
+# #Mann Kendall test p-value indicates we should reject the null hypothesis. Data has a deterministic trend.
 
-#auto arima with orginal SAL series
-SAL_auto <- auto.arima(ts_SAL_clean)
-summary(SAL_auto)
+```
 
-#auto arima with deseasoned LT2 series
-LT2_deseas_auto <- auto.arima(ts_LT2_deseas,seasonal=FALSE)
-summary(LT2_deseas_auto)
+```{r}
 
-#auto arima with deseasoned SAL series
-SAL_deseas_auto <- auto.arima(ts_SAL_deseas,seasonal=FALSE)
-summary(SAL_deseas_auto)
+# #auto arima with orginal LT2 series
+# LT2_auto <- auto.arima(ts_LT2_clean)
+# summary(LT2_auto)
+# 
+# #auto arima with orginal SAL series
+# SAL_auto <- auto.arima(ts_SAL_clean)
+# summary(SAL_auto)
+# 
+# #auto arima with deseasoned LT2 series
+# LT2_deseas_auto <- auto.arima(ts_LT2_deseas,seasonal=FALSE)
+# summary(LT2_deseas_auto)
+# 
+# #auto arima with deseasoned SAL series
+# SAL_deseas_auto <- auto.arima(ts_SAL_deseas,seasonal=FALSE)
+# summary(SAL_deseas_auto)
 
 ```
 
 
 ```{r subset daily time series}
 
-# create a subset of the time series that excludes one month
+# create a subset of the time series that excludes one year
 n_for = 365
 LT2_daily_training <- subset(ts_LT2_clean, end = length(ts_LT2_clean) - n_for)
 
@@ -422,42 +422,45 @@ print(STL_ETS_scores)
 STL_ETS_forecast <- ETS_fit$mean
 print(STL_ETS_forecast)
 
-getwd()
-submission_template <- read.csv(file="./submission_template.csv", header=TRUE)
-submission_template$date <- as.Date(submission_template$date, format = "%m/%d/%y")
-submission_template$load <- STL_ETS_forecast
-write.table(submission_template, "submission.csv", sep = ",", row.names = FALSE, quote = FALSE)
+```
+
+```{r}
+
+# create a subset of the time series that excludes one year
+n_for = 365
+SAL_daily_training <- subset(ts_SAL_clean, end = length(ts_SAL_clean) - n_for)
+
+# create a subset of the time series that only includes the last 365 days
+SAL_daily_testing <- subset(ts_SAL_clean, start = length(ts_SAL_clean) - n_for)
+
+autoplot(SAL_daily_training)
+autoplot(SAL_daily_testing)
 
 ```
 
-```{r ARIMA and Fourier Model 1}
 
-ARIMA_Fourier_fit_1 <- auto.arima(ts_daily_training, 
-                             seasonal = FALSE, 
-                             lambda = 0,
-                             xreg = fourier(ts_daily_training, 
-                                            K=c(2,12)))
+```{r}
 
-ARIMA_Fourier_forecast_1 <- forecast(ARIMA_Fourier_fit_1,
-                                   xreg=fourier(ts_daily_training,
-                                                K = c(2,12), h = 31), h=31) 
+# fit and forecast STL + ETS model to data
+ETS_fit_2 <-  stlf(SAL_daily_training, h = 365)
 
 # plot foresting results
-autoplot(ARIMA_Fourier_forecast_1) + 
-  ylab("Daily Load") + 
+autoplot(ETS_fit_2) + 
+  ylab("depth to groundwater (meters)") + 
   theme_light()
 
 # plot model + observed data
-autoplot(ts_daily, series = "Original") +
-  autolayer(ARIMA_Fourier_forecast_1, series = "ARIMA FOURIER 1", PI = FALSE) +
-  ylab("Daily Load") +
+autoplot(ts_SAL_clean, series = "Original") +
+  autolayer(ETS_fit_2, series = "STL + ETS", PI = FALSE) +
+  ylab("depth to groundwater (meters)") +
   theme_light()
 
 # check the MAPE
-ARIMA_Fourier_scores_1 <- accuracy(ARIMA_Fourier_forecast_1$mean, ts_daily_testing)
-ARIMA_Fourier_scores_1
+STL_ETS_scores_2 <- accuracy(ETS_fit_2$mean, SAL_daily_testing)
+print(STL_ETS_scores_2)
 
-forecast_1 <- as.numeric(ARIMA_Fourier_forecast_1$mean)
-print(forecast_1)
+STL_ETS_forecast_2 <- ETS_fit_2$mean
+print(STL_ETS_forecast_2)
 
 ```
+
